@@ -3,9 +3,9 @@ import { readFile } from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
-import characters from '../pages/data/characters.js';
-import events from '../pages/data/events.js';
-import items from '../pages/data/items.js';
+import characters from '../utils/data/characters.js';
+import events from '../utils/data/events.js';
+import items from '../utils/data/items.js';
 
 // Load Service Account Key
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
