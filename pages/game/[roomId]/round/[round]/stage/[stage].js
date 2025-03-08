@@ -144,7 +144,7 @@ export default function StagePage() {
 
     return (
         <div>
-            <StageComponent stage={stage} roomId={roomId} round={round} />
+            <StageComponent stage={stage} roomId={roomId} round={round} currentUser={currentUser} />
             {gameData?.players.length && (
                 <PlayerList players={gameData?.players} gameData={gameData} currentPlayer={currentPlayer} currentUser={currentUser} />
             )}

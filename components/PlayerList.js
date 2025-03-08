@@ -6,7 +6,6 @@ const db = getFirestore(app);
 export default function PlayerList({ players, currentPlayer, currentUser, gameData }) {
     const currentRound = gameData.currentRound;
 
-    console.log("PlayerList -> currentUSEr", currentPlayer);
 
     const handleTargetSelection = async (targetUid) => {
         if (!gameData || !currentUser) return;
@@ -35,7 +34,6 @@ export default function PlayerList({ players, currentPlayer, currentUser, gameDa
 
         try {
             await updateDoc(gameRef, { killBox: updatedKillBox });
-            console.log("Target selection updated in Firestore");
         } catch (error) {
             console.error("Error updating target:", error);
         }

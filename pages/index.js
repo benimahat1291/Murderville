@@ -72,6 +72,7 @@ export default function Home() {
             players: [hostPlayer, ...botPlayers],
             councelResults: [],
             killBox: [],
+            events: [],
             votingStarted: false,
             votingComplete: false,
         });

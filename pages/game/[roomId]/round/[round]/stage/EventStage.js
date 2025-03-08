@@ -1,41 +1,48 @@
-import useGameData from '../../../../../../hooks/useGameData';
-import PlayerList from '../../../../../../components/PlayerList';
-import { advanceToNextStageOrRound } from '../../../../../../utils/gameLogic';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import useGameData from '../../../../../../hooks/useGameData';
+import { gameEvents, getRandomEvent } from '../../../../../../utils/gameEvents';
+import { advanceToNextStageOrRound } from '../../../../../../utils/gameLogic';
+import HandYoureDealt from '../../../../../../components/events/HandYoureDealt';
 
-export default function EventStage({ roomId, round, stage }) {
-    const { players, currentUser, game } = useGameData(roomId);
+export default function EventStage({ roomId, round, stage, currentUser }) {
+    const { game, updateGame } = useGameData(roomId);
     const router = useRouter();
 
+    const [event, setEvent] = useState(null);
+
     useEffect(() => {
-        if (game.currentRound && game.currentStage) {
-            const expectedPath = `/game/${roomId}/round/${game.currentRound}/stage/${game.currentStage}`;
-            if (router.asPath !== expectedPath) {
-                router.push(expectedPath);  // ✅ Works if router comes from useRouter()
-            }
+        if (!game || !roomId) return;
 
-        }
-    }, [game.currentRound, game.currentStage, router]);
+        const selectedEvent = gameEvents.theHandYoureDealt(game);
+        setEvent(selectedEvent);
+    }, [game, roomId]);
 
-    const handleNext = async () => {
-        await advanceToNextStageOrRound(roomId);
+    const handleGameCompletion = (updatedPlayers) => {
+        updateGame({ players: updatedPlayers });
+        advanceToNextStageOrRound(roomId);
     };
-    const isHost = game.hostId === currentUser?.uid;
 
-    console.log("Game", game);
+    const isHost = currentUser && game.hostId === currentUser.uid;
 
     return (
         <div className="p-6">
-            <h1 className="text-sm font-bold">Round {round} - Stage {stage}: EVENT OCCURS</h1>
-            <strong>THIS STAGE IS CURRENTLY UNAVIALIABLE</strong>
-            <p>Some sort of Event takes Place in the Village... Game mode where players are given a task to earn gold for the village</p>
+            <h1 className="text-2xl font-bold">Round {round} - Stage {stage}: Event</h1>
+
+            <div className="mt-4 bg-blue-100 p-2">
+                <strong>{event?.type}</strong>
+                <p className="text-lg">{event?.message || "Waiting for event selection..."}</p>
+            </div>
+
+            {/* Load the game component if the event is "The Hand You’re Dealt" */}
+            {event?.type === "The Hand You’re Dealt" && game.players ? ( // ✅ Ensure game.players is defined
+                <HandYoureDealt gameData={game} currentUser={currentUser} isHost={isHost} currentRound={round} gameId={roomId} players={game.players} onComplete={handleGameCompletion} />
+            ) : (
+                <p>Other event logic here...</p>
+            )}
 
             {isHost && (
-                <button
-                    onClick={handleNext}
-                    className="mt-4 bg-green-500 px-4 py-2 text-white rounded"
-                >
+                <button onClick={() => advanceToNextStageOrRound(roomId)} className="mt-4 bg-green-500 px-4 py-2 text-white rounded">
                     Next Stage
                 </button>
             )}
