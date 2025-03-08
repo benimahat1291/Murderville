@@ -1,4 +1,3 @@
-// pages/login.js
 import { useState, useEffect } from 'react';
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
 import { useRouter } from 'next/router';
@@ -13,7 +12,6 @@ export default function Login() {
     const auth = getAuth(app);
     const googleProvider = new GoogleAuthProvider();
 
-    // If already logged in, redirect to homepage
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -23,7 +21,6 @@ export default function Login() {
         return () => unsubscribe();
     }, [router]);
 
-    // Email + Password Login
     const handleEmailLogin = async (e) => {
         e.preventDefault();
         setError('');
@@ -35,7 +32,6 @@ export default function Login() {
         }
     };
 
-    // Google Login
     const handleGoogleLogin = async () => {
         try {
             await signInWithPopup(auth, googleProvider);
@@ -46,38 +42,51 @@ export default function Login() {
     };
 
     return (
-        <div style={{ textAlign: 'center', marginTop: '50px' }}>
-            <h1>Login</h1>
+        <div className="flex min-h-screen items-center justify-center bg-gray-100">
+            <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
+                <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h1>
 
-            <form onSubmit={handleEmailLogin}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    style={{ margin: '5px' }}
-                />
-                <br />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    style={{ margin: '5px' }}
-                />
-                <br />
-                <button type="submit" style={{ margin: '10px', padding: '10px 20px' }}>Login with Email</button>
-            </form>
+                <form onSubmit={handleEmailLogin} className="space-y-4">
+                    <input
+                        type="email"
+                        placeholder="Email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                    />
+                    <input
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                    />
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition"
+                    >
+                        Login with Email
+                    </button>
+                </form>
 
-            <p>OR</p>
+                <div className="my-4 text-center text-gray-500">OR</div>
 
-            <button onClick={handleGoogleLogin} style={{ padding: '10px 20px' }}>Login with Google</button>
+                <button
+                    onClick={handleGoogleLogin}
+                    className="w-full bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition"
+                >
+                    Login with Google
+                </button>
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+                {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
 
-            <p>Don't have an account? <a href="/register">Register here</a></p>
+                <p className="mt-4 text-center text-gray-600">
+                    Don't have an account?{' '}
+                    <a href="/register" className="text-blue-500 hover:underline">Register here</a>
+                </p>
+            </div>
         </div>
     );
 }

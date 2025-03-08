@@ -64,9 +64,15 @@ export default function Home() {
             hostId: user.uid,
             createdAt: new Date().toISOString(),
             phase: 'lobby',
+            currentRound: 0,
+            currentStage: 0,
+            roundHistory: [],
             numPlayers,
             numTraitors,
-            players: [hostPlayer, ...botPlayers]
+            players: [hostPlayer, ...botPlayers],
+            councelResults: [],
+            votingStarted: false,
+            votingComplete: false,
         });
 
         router.push(`/lobby/${roomId}`);

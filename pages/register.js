@@ -12,7 +12,6 @@ export default function Register() {
 
     const auth = getAuth(app);
 
-    // Auto redirect if already logged in
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -50,9 +49,9 @@ export default function Register() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-            <div className="bg-white shadow-lg rounded-lg p-8 max-w-sm w-full">
-                <h1 className="text-2xl font-bold text-center mb-4">Register</h1>
+        <div className="flex min-h-screen items-center justify-center bg-gray-100">
+            <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
+                <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h1>
 
                 <form onSubmit={handleRegister} className="space-y-4">
                     <input
@@ -61,7 +60,7 @@ export default function Register() {
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
                         required
-                        className="w-full p-2 border border-gray-300 rounded"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
                     />
                     <input
                         type="email"
@@ -69,7 +68,7 @@ export default function Register() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
-                        className="w-full p-2 border border-gray-300 rounded"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
                     />
                     <input
                         type="password"
@@ -77,11 +76,11 @@ export default function Register() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
-                        className="w-full p-2 border border-gray-300 rounded"
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
                     />
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
+                        className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition"
                     >
                         Create Account
                     </button>
@@ -89,7 +88,7 @@ export default function Register() {
 
                 {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
 
-                <p className="mt-4 text-center">
+                <p className="mt-4 text-center text-gray-600">
                     Already have an account?{' '}
                     <a href="/login" className="text-blue-500 hover:underline">Login here</a>
                 </p>
