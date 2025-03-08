@@ -39,7 +39,6 @@ export default function EventStage({ roomId, round, stage }) {
                     Next Stage
                 </button>
             )}
-            <PlayerList players={players} currentUser={currentUser} />
         </div>
     );
 }

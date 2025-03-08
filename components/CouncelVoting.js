@@ -31,18 +31,18 @@ export default function CouncelVoting({ players, currentUser, onVotesSubmitted, 
         <div className="space-y-4">
             <h2 className="text-xl font-bold">Vote for who you suspect!</h2>
             <p>You must vote for {maxVotes} players.</p>
-            <ul className="space-y-2">
+            <div className="space-y-2 space-x-2 flex flex-wrap">
                 {voteOptions.map(player => (
                     <li key={player.uid} className="flex items-center space-x-2">
                         <button
                             onClick={() => handleVote(player.uid)}
                             className={`px-4 py-2 border rounded ${selectedVotes.includes(player.uid) ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
                         >
-                            {player.name}
+                            {player.name}-{player.character}
                         </button>
                     </li>
                 ))}
-            </ul>
+            </div>
             <button
                 onClick={submitVotes}
                 className="mt-4 px-6 py-2 bg-green-500 text-white rounded"

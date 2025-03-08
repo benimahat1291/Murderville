@@ -71,6 +71,7 @@ export default function Home() {
             numTraitors,
             players: [hostPlayer, ...botPlayers],
             councelResults: [],
+            killBox: [],
             votingStarted: false,
             votingComplete: false,
         });

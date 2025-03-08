@@ -5,6 +5,7 @@ import PlayerList from '../../../../../../components/PlayerList';
 import CouncelVoting from '../../../../../../components/CouncelVoting';
 import { advanceToNextStageOrRound, saveVotesToFirestore, startVotingForAllPlayers } from '../../../../../../utils/gameLogic';
 import { getFirestore, doc, onSnapshot, updateDoc, runTransaction } from 'firebase/firestore';
+import CouncelResults from '../../../../../../components/CouncelResults';
 
 const db = getFirestore();
 
@@ -102,14 +103,7 @@ export default function CouncelStage({ roomId, round, stage }) {
 
             {votingComplete ? (
                 <div className="mt-4">
-                    <h2 className="text-xl text-green-500 font-bold">Vote Results</h2>
-                    <ul>
-                        {votesResult.map((player, index) => (
-                            <li className={`${index === 0 && "bg-red-200 p-2"} `} key={player.uid}>
-                                {player.name} ({player.character}) - {player.voteCount} votes (Voted by: {player.votes.join(', ')})
-                            </li>
-                        ))}
-                    </ul>
+                    <CouncelResults votesResult={votesResult} />
                 </div>
             ) : (
                 <>
@@ -145,7 +139,6 @@ export default function CouncelStage({ roomId, round, stage }) {
                 </button>
             )}
 
-            <PlayerList players={players} currentUser={currentUser} />
         </div>
     );
 }

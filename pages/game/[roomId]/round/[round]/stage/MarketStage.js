@@ -36,7 +36,6 @@ export default function MarketStage({ roomId, round, stage }) {
                     Next Stage
                 </button>
             )}
-            <PlayerList players={players} currentUser={currentUser} />
         </div>
     );
 }
