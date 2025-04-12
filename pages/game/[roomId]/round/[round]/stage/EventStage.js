@@ -36,7 +36,9 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
 
             {/* Load the game component if the event is "The Hand You’re Dealt" */}
             {event?.type === "The Hand You’re Dealt" && game.players ? ( // ✅ Ensure game.players is defined
-                <HandYoureDealt gameData={game} currentUser={currentUser} isHost={isHost} currentRound={round} gameId={roomId} players={game.players} onComplete={handleGameCompletion} />
+                <>
+                    <HandYoureDealt gameData={game} currentUser={currentUser} isHost={isHost} currentRound={round} gameId={roomId} players={game.players} onComplete={handleGameCompletion} />
+                </>
             ) : (
                 <p>Other event logic here...</p>
             )}

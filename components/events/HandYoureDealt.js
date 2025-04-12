@@ -1,15 +1,19 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc, updateDoc, onSnapshot, runTransaction } from "firebase/firestore";
-import { db } from "../../utils/firebase"; // Firestore db
-import { initializeGame } from "../../utils/events/handyouredealt"; // Game initialization function
+import { db } from "../../utils/firebase";
+import { initializeGame } from "../../utils/events/handyouredealt";
 
 export default function HandYoureDealt({ gameId, currentUser, isHost, currentRound }) {
     const [alivePlayers, setAlivePlayers] = useState([]);
     const [currentPlayer, setCurrentPlayer] = useState(null);
     const [eventData, setEventData] = useState(null);
 
+    console.log(isHost, currentUser, currentRound);
+
+    const roundKey = String(currentRound);
+
     useEffect(() => {
-        if (!gameId || !currentRound) return;
+        if (!gameId || !roundKey) return;
 
         const fetchOrInitializeEvent = async () => {
             console.log("🔄 Checking event in Firestore...");
@@ -18,8 +22,7 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
 
             if (gameSnap.exists()) {
                 const gameData = gameSnap.data();
-                const events = Array.isArray(gameData.events) ? gameData.events : Object.values(gameData.events || {});
-                const event = events.find(e => e.round === currentRound);
+                const event = gameData.events?.[roundKey];
 
                 if (!event) {
                     console.log("🚀 Event does not exist, initializing...");
@@ -31,73 +34,67 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
         };
 
         fetchOrInitializeEvent();
-    }, [gameId, currentRound]);
+    }, [gameId, roundKey]);
 
     useEffect(() => {
-        if (!gameId || !currentRound) return;
+        if (!gameId || !roundKey) return;
 
-        console.log("🔄 Listening for event players in Firestore...");
         const gameRef = doc(db, "games", gameId);
 
         const unsubscribe = onSnapshot(gameRef, (gameSnap) => {
-            if (gameSnap.exists()) {
-                const gameData = gameSnap.data();
-                const events = Array.isArray(gameData.events) ? gameData.events : Object.values(gameData.events || {});
-                const event = events.find(e => e.round === currentRound);
+            if (!gameSnap.exists()) return;
 
-                if (event) {
-                    setAlivePlayers([...event.players]);
-                    setEventData(event);
+            const gameData = gameSnap.data();
+            const event = gameData.events?.[roundKey];
 
-                    const foundPlayer = event.players.find(p => p.uid === currentUser.uid);
-                    setCurrentPlayer(foundPlayer || null);
+            if (event && Array.isArray(event.players)) {
+                setAlivePlayers(event.players);
+                setEventData(event);
 
-                    if (event.players.every(p => p.choice !== null) && event.gameState !== "completed") {
-                        finishTheGame(gameId, currentRound, event.players);
-                    }
+                const found = event.players.find(p => p.uid === currentUser.uid);
+                setCurrentPlayer(found || null);
+
+                if (event.players.every(p => p.choice !== null) && event.gameState !== "completed") {
+                    finishTheGame(gameId, roundKey, event.players);
                 }
             }
         });
 
         return () => unsubscribe();
-    }, [gameId, currentRound]);
+    }, [gameId, roundKey]);
 
     const startGame = async () => {
-        console.log("🚀 Fetching game data...");
+        console.log("🚀 Starting game...");
         const gameRef = doc(db, "games", gameId);
 
         try {
             const gameSnap = await getDoc(gameRef);
 
-            if (gameSnap.exists()) {
-                let gameData = gameSnap.data();
-                let events = [...gameData.events]; // Clone events array
-
-                // Find the correct event index for this round
-                let eventIndex = events.findIndex(e => e.round === currentRound);
-                if (eventIndex === -1) {
-                    console.log("❌ No matching event found for this round.");
-                    return;
-                }
-
-                // ✅ Update only the `gameState` field in the correct event object
-                await updateDoc(gameRef, { [`events.${eventIndex}.gameState`]: "inProgress" });
-
-                console.log("✅ Game state updated to inProgress");
-            } else {
+            if (!gameSnap.exists()) {
                 console.log("❌ No game found with this ID!");
+                return;
             }
+
+            const gameData = gameSnap.data();
+            const event = gameData.events?.[roundKey];
+
+            if (!event) {
+                console.log("❌ No matching event found for this round.");
+                return;
+            }
+
+            await updateDoc(gameRef, {
+                [`events.${roundKey}.gameState`]: "inProgress"
+            });
+
+            console.log("✅ Game state updated to inProgress");
         } catch (error) {
             console.error("❌ Error updating game state:", error);
         }
     };
 
-
-
     const handleDecision = async (decision) => {
-        if (!gameId || !currentRound || !currentPlayer) return;
-
-        console.log(`📌 ${currentPlayer.name} chose: ${decision ? "Play" : "Fold"}`);
+        if (!gameId || !roundKey || !currentPlayer) return;
 
         const gameRef = doc(db, "games", gameId);
 
@@ -107,15 +104,15 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
                 if (!gameSnap.exists()) return;
 
                 const gameData = gameSnap.data();
-                const eventIndex = gameData.events.findIndex(e => e.round === currentRound);
-                if (eventIndex === -1) return;
+                const event = gameData.events?.[roundKey];
+                if (!event) return;
 
-                const updatedPlayers = gameData.events[eventIndex].players.map(player =>
+                const updatedPlayers = event.players.map(player =>
                     player.uid === currentPlayer.uid ? { ...player, choice: decision } : player
                 );
 
                 transaction.update(gameRef, {
-                    [`events.${eventIndex}.players`]: updatedPlayers
+                    [`events.${roundKey}.players`]: updatedPlayers
                 });
             });
 
@@ -125,9 +122,7 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
         }
     };
 
-    const finishTheGame = async (gameId, currentRound, players) => {
-        console.log("🔄 Finishing the game...");
-
+    const finishTheGame = async (gameId, roundKey, players) => {
         const gameRef = doc(db, "games", gameId);
 
         try {
@@ -136,10 +131,8 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
                 if (!gameSnap.exists()) return;
 
                 const gameData = gameSnap.data();
-                const eventIndex = gameData.events.findIndex(e => e.round === currentRound);
-                if (eventIndex === -1) return;
-
-                const event = gameData.events[eventIndex];
+                const event = gameData.events?.[roundKey];
+                if (!event) return;
 
                 const didnotplay = players.filter(p => p.choice === false).map(p => p.uid);
                 const playingPlayers = players.filter(p => p.choice === true);
@@ -153,10 +146,10 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
                 const losers = sortedPlayers.slice(half);
 
                 transaction.update(gameRef, {
-                    [`events.${eventIndex}.winners`]: winners.map(p => p.uid),
-                    [`events.${eventIndex}.losers`]: losers.map(p => p.uid),
-                    [`events.${eventIndex}.didnotplay`]: didnotplay,
-                    [`events.${eventIndex}.gameState`]: "completed",
+                    [`events.${roundKey}.winners`]: winners.map(p => p.uid),
+                    [`events.${roundKey}.losers`]: losers.map(p => p.uid),
+                    [`events.${roundKey}.didnotplay`]: didnotplay,
+                    [`events.${roundKey}.gameState`]: "completed"
                 });
             });
 
@@ -169,20 +162,39 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
     return (
         <div className="p-4 bg-gray-100 rounded shadow">
             <h2 className="text-xl font-bold mb-2">The Hand You’re Dealt</h2>
+            <div className="mb-4 p-4 rounded border border-blue-300 bg-blue-50 text-blue-900">
+                <h3 className="text-lg font-bold mb-2">🎴 How This Game Works</h3>
+                <ul className="list-disc pl-5 space-y-2 text-sm leading-relaxed">
+                    <li>Each player is dealt <strong>two random cards</strong>.</li>
+                    <li>You must choose whether to <span className="font-semibold text-green-700">Play</span> or <span className="font-semibold text-red-700">Fold</span>.</li>
+                    <li>To Play you must offer  <span className="font-semibold text-red-700">- 2 coins</span>, Win = <span className="font-semibold text-win-700">+ 2 Coins</span>.</li>
 
+                    <li>Once all players have chosen, their card totals are compared.</li>
+                    <li><strong>The top half</strong> of players who played are marked as <span className="font-semibold text-green-700">Winners</span>.</li>
+                    <li><strong>The bottom half</strong> are <span className="font-semibold text-red-700">Losers</span>.</li>
+                    <li>Players who folded are noted separately as having <em>sat out</em>.</li>
+                </ul>
+            </div>
             {!eventData && <p>Loading event...</p>}
 
             {eventData?.gameState === "waiting" && (
-                <div>
+                <div className="mt-4 p-4 bg-yellow-100 border border-yellow-300 rounded">
                     {isHost ? (
-                        <button className="btn border-black border" onClick={startGame}>
-                            Start Game
-                        </button>
+                        <>
+                            <p className="mb-2 font-semibold">You are the host. Start the round when ready:</p>
+                            <button
+                                onClick={startGame}
+                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+                            >
+                                ▶️ Start Game
+                            </button>
+                        </>
                     ) : (
-                        <span>Waiting for host to start the game...</span>
+                        <p className="italic text-gray-700">Waiting for the host to start the game...</p>
                     )}
                 </div>
             )}
+
 
             {eventData?.gameState === "inProgress" && currentPlayer && (
                 <>
