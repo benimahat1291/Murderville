@@ -26,22 +26,25 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
     const isHost = currentUser && game.hostId === currentUser.uid;
 
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold">Round {round} - Stage {stage}: Event</h1>
+        <div className="">
+            <h1 className="text-base text-white font-bold"> {round}.{stage}) Event</h1>
 
-            <div className="mt-4 bg-blue-100 p-2">
+            {/* <div className="mt-4 bg-blue-100 p-2">
                 <strong>{event?.type}</strong>
                 <p className="text-lg">{event?.message || "Waiting for event selection..."}</p>
-            </div>
+            </div> */}
 
             {/* Load the game component if the event is "The Hand You’re Dealt" */}
-            {event?.type === "The Hand You’re Dealt" && game.players ? ( // ✅ Ensure game.players is defined
-                <>
-                    <HandYoureDealt gameData={game} currentUser={currentUser} isHost={isHost} currentRound={round} gameId={roomId} players={game.players} onComplete={handleGameCompletion} />
-                </>
-            ) : (
-                <p>Other event logic here...</p>
-            )}
+            <div className='mt-4 p-2'>
+                {event?.type === "The Hand You’re Dealt" && game.players ? ( // ✅ Ensure game.players is defined
+                    <>
+                        <HandYoureDealt gameData={game} currentUser={currentUser} isHost={isHost} currentRound={round} gameId={roomId} players={game.players} onComplete={handleGameCompletion} />
+                    </>
+                ) : (
+                    <p>Other event logic here...</p>
+                )}
+            </div>
+
 
             {isHost && (
                 <button onClick={() => advanceToNextStageOrRound(roomId)} className="mt-4 bg-green-500 px-4 py-2 text-white rounded">

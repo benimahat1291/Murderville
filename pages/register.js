@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
-import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from 'firebase/auth';
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    updateProfile,
+    onAuthStateChanged,
+} from 'firebase/auth';
 import { useRouter } from 'next/router';
 import { app } from '../utils/firebase';
+import Page from '../components/layout/Page'; // adjust path if needed
 
 export default function Register() {
     const [displayName, setDisplayName] = useState('');
@@ -24,11 +30,9 @@ export default function Register() {
     const handleRegister = async (e) => {
         e.preventDefault();
         setError('');
-
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-
             await updateProfile(user, { displayName });
             router.push('/');
         } catch (err) {
@@ -49,50 +53,54 @@ export default function Register() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-100">
-            <div className="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
-                <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h1>
+        <Page>
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="w-full max-w-md bg-black bg-opacity-70 text-white p-6 rounded-xl shadow-lg space-y-6">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-center font-pixel">Become a Villager</h1>
 
-                <form onSubmit={handleRegister} className="space-y-4">
-                    <input
-                        type="text"
-                        placeholder="Display Name"
-                        value={displayName}
-                        onChange={(e) => setDisplayName(e.target.value)}
-                        required
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                    />
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                    />
-                    <button
-                        type="submit"
-                        className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition"
-                    >
-                        Create Account
-                    </button>
-                </form>
+                    <form onSubmit={handleRegister} className="space-y-4">
+                        <input
+                            type="text"
+                            placeholder="Display Name"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            required
+                            className="w-full p-3 bg-white text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                        />
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="w-full p-3 bg-white text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full p-3 bg-white text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                        />
+                        <button
+                            type="submit"
+                            className="w-full bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 transition"
+                        >
+                            Create Account
+                        </button>
+                    </form>
 
-                {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
+                    {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
-                <p className="mt-4 text-center text-gray-600">
-                    Already have an account?{' '}
-                    <a href="/login" className="text-blue-500 hover:underline">Login here</a>
-                </p>
+                    <p className="mt-4 text-center text-gray-300">
+                        Already have an account?{' '}
+                        <a href="/login" className="text-blue-400 hover:underline font-bold">
+                            Login here
+                        </a>
+                    </p>
+                </div>
             </div>
-        </div>
+        </Page>
     );
 }

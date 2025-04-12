@@ -5,6 +5,8 @@ export default function Document() {
         <Html lang="en">
             <Head>
                 {/* Add custom meta tags, fonts, etc. here */}
+                <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+
             </Head>
             <body>
                 <Main />

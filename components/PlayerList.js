@@ -6,29 +6,24 @@ const db = getFirestore(app);
 export default function PlayerList({ players, currentPlayer, currentUser, gameData }) {
     const currentRound = gameData.currentRound;
 
-
     const handleTargetSelection = async (targetUid) => {
         if (!gameData || !currentUser) return;
 
         const gameRef = doc(db, 'games', gameData.roomId);
-
-        // Check if a killBox entry exists for this round
-        const existingKillBox = gameData.killBox.find(kb => kb.round === currentRound);
+        const existingKillBox = gameData.killBox.find((kb) => kb.round === currentRound);
 
         let updatedKillBox;
 
         if (existingKillBox) {
-            // Update existing round entry
-            updatedKillBox = gameData.killBox.map(kb =>
+            updatedKillBox = gameData.killBox.map((kb) =>
                 kb.round === currentRound
                     ? { ...kb, targets: { ...kb.targets, [currentUser.uid]: targetUid } }
                     : kb
             );
         } else {
-            // Create new entry for the current round
             updatedKillBox = [
                 ...gameData.killBox,
-                { round: currentRound, targets: { [currentUser.uid]: targetUid } }
+                { round: currentRound, targets: { [currentUser.uid]: targetUid } },
             ];
         }
 
@@ -40,30 +35,50 @@ export default function PlayerList({ players, currentPlayer, currentUser, gameDa
     };
 
     return (
-        <ul className="list-disc space-y-2 text-lg ml-8">
-            {players.map((p) => (
-                <li key={p.uid}>
-                    {p.name} - {p.character}
+        <div className="w-full max-w-5xl mx-auto mt-6 text-white">
+            <h2 className="text-lg font-pixel mb-4">🧑 Players</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {players.map((p) => {
+                    const isAlive = p.alive;
+                    const isTargetable = currentPlayer?.isMurderer && !p.isMurderer && isAlive;
 
-                    {p.alive ? (
-                        <span className="font-bold ml-2 text-green-500">A</span>
-                    ) : (
-                        <span className="font-bold ml-2 text-red-500">D</span>
-                    )}
-
-
-
-                    {/* Show Target Button only for Murderers & Only for Non-Murderer Players */}
-                    {currentPlayer?.isMurderer && !p.isMurderer && p.alive && (
-                        <button
-                            onClick={() => handleTargetSelection(p.uid)}
-                            className="ml-4 bg-red-100  text-sm text-red-500  px-2 py-1 rounded"
+                    return (
+                        <div
+                            key={p.uid}
+                            className={`flex flex-col justify-between h-full bg-black bg-opacity-70 border border-gray-700 p-4 rounded-lg shadow-lg`}
                         >
-                            Target
-                        </button>
-                    )}
-                </li>
-            ))}
-        </ul>
+                            {/* Placeholder image or role-based character art */}
+                            <img
+                                src={p.image || '/images/default-avatar.png'}
+                                alt={`${p.character} portrait`}
+                                className="w-full h-32 object-cover rounded mb-4 border border-gray-600 shadow"
+                            />
+
+                            <div className="space-y-1 text-sm">
+                                <p><span className="font-bold">Character:</span> {p.character}</p>
+                                <p><span className="font-bold">Name:</span> <span className="italic text-gray-300">{p.name}</span></p>
+                                <p>
+                                    <span className="font-bold">Status:</span>{' '}
+                                    {isAlive ? (
+                                        <span className="text-green-400">🟢 Alive</span>
+                                    ) : (
+                                        <span className="text-red-400">🔴 Dead</span>
+                                    )}
+                                </p>
+                            </div>
+
+                            {isTargetable && (
+                                <button
+                                    onClick={() => handleTargetSelection(p.uid)}
+                                    className="mt-4 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1 rounded shadow"
+                                >
+                                    🎯 Target
+                                </button>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
     );
 }
