@@ -6,6 +6,8 @@ const db = getFirestore(app);
 export default function PlayerList({ players, currentPlayer, currentUser, gameData }) {
     const currentRound = gameData.currentRound;
 
+    console.log(players)
+
     const handleTargetSelection = async (targetUid) => {
         if (!gameData || !currentUser) return;
 
@@ -41,7 +43,7 @@ export default function PlayerList({ players, currentPlayer, currentUser, gameDa
                 {players.map((p) => {
                     const isAlive = p.alive;
                     const isTargetable = currentPlayer?.isMurderer && !p.isMurderer && isAlive;
-
+                    console.log(p)
                     return (
                         <div
                             key={p.uid}
@@ -49,11 +51,10 @@ export default function PlayerList({ players, currentPlayer, currentUser, gameDa
                         >
                             {/* Placeholder image or role-based character art */}
                             <img
-                                src={p.image || '/images/default-avatar.png'}
-                                alt={`${p.character} portrait`}
-                                className="w-full h-32 object-cover rounded mb-4 border border-gray-600 shadow"
+                                src={`/characters/${p.characterSlug}.webp`}
+                                alt={`${p.character}`}
+                                className="w-full h-32 object-cover rounded mb-4 border"
                             />
-
                             <div className="space-y-1 text-sm">
                                 <p><span className="font-bold">Character:</span> {p.character}</p>
                                 <p><span className="font-bold">Name:</span> <span className="italic text-gray-300">{p.name}</span></p>

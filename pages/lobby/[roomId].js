@@ -73,18 +73,18 @@ export default function Lobby() {
 
     const startGame = async () => {
         const villageCharacters = [
-            'The Mayor',
-            'The Doctor',
-            'The Blacksmith',
-            'The Innkeeper',
-            'The Priest',
-            'The Baker',
-            'The Hunter',
-            'The Fortune Teller',
-            'The Drunkard',
-            'The Tailor',
-            'The Outcast',
-            'The Stranger',
+            { name: 'The Mayor', slug: 'mayor' },
+            { name: 'The Doctor', slug: 'doctor' },
+            { name: 'The Blacksmith', slug: 'blacksmith' },
+            { name: 'The Innkeeper', slug: 'innkeeper' },
+            { name: 'The Priest', slug: 'priest' },
+            { name: 'The Baker', slug: 'baker' },
+            { name: 'The Hunter', slug: 'hunter' },
+            { name: 'The Fortune Teller', slug: 'fortune-teller' },
+            { name: 'The Drunkard', slug: 'drunkard' },
+            { name: 'The Tailor', slug: 'tailor' },
+            { name: 'The Outcast', slug: 'outcast' },
+            { name: 'The Stranger', slug: 'stranger' },
         ];
 
         const gameRef = doc(db, 'games', roomId);
@@ -101,17 +101,22 @@ export default function Lobby() {
             .map((p) => p.uid);
 
         // Assign roles
-        const updatedPlayers = game.players.map((p, index) => ({
-            ...p,
-            character: shuffledCharacters[index] || 'Villager',
-            isMurderer: murderers.includes(p.uid),
-        }));
+        const updatedPlayers = game.players.map((p, index) => {
+            const character = shuffledCharacters[index];
+            return {
+                ...p,
+                character: character ? character.name : 'Villager',
+                characterSlug: character ? character.slug : 'villager',
+                isMurderer: murderers.includes(p.uid),
+            };
+        });
 
         await updateDoc(gameRef, {
             phase: 'started',
             players: updatedPlayers,
         });
     };
+
 
     return (
         <Page>
