@@ -22,14 +22,14 @@ const CouncelResults = ({ votesResult }) => {
                             onError={(e) => (e.currentTarget.src = `default.webp`)}
                             className={` object-cover ${index === 0 ? 'h-40' : 'w-20'}`}
                         />
-                        <div className={`${index === 0 ? 'mt-2' : 'ml-2'} flex flex-col `}>
+                        <div className={`${index === 0 ? 'mt-2' : 'ml-2'} flex flex-col w-full `}>
                             <div className="flex justify-between items-center mb-1">
                                 <span className="text-xs font-bold">
                                     {player.character}
-                                    {index === 0 && <span className="ml-2 text-red-400">🔪 Exiled</span>}
                                 </span>
                                 <span className="text-green-300 font-bold">{player.voteCount} vote{player.voteCount > 1 ? 's' : ''}</span>
                             </div>
+                            {index === 0 && <span className="ml-2 text-red-400 my-2">Exiled 🔪 </span>}
 
                             <div className="text-[9px] text-blue-200">
                                 Voted by: <span className="italic">{player.votes.join(', ')}</span>

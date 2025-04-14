@@ -141,7 +141,20 @@ export default function RolesPage() {
                     </div>
                 )}
 
-
+                {/* Murderers-Only Box */}
+                {playerIsMurderer(currentUser, players) && (
+                    <div className="w-full max-w-xl bg-red-900 bg-opacity-60 border border-red-500 text-white p-4 mt-6 rounded-lg">
+                        <h2 className="font-pixel text-lg mb-2 text-red-200 text-center">🩸 Fellow Murderers</h2>
+                        <ul className="list-disc pl-5 space-y-1 text-sm">
+                            {players
+                                .filter((p) => p.isMurderer && p.uid !== currentUser?.uid)
+                                .map((murderer) => (
+                                    <li key={murderer.uid} className="text-red-300">{murderer.name}</li>
+                                ))}
+                        </ul>
+                        <p className="text-xs text-red-400 mt-2 text-center italic">Keep your identity hidden...</p>
+                    </div>
+                )}
             </div>
         </Page>
 

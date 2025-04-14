@@ -71,7 +71,7 @@ export default function Lobby() {
         });
     }, [roomId, router]);
 
-    const startGame = async () => {
+    const startGame = async (randomize = true) => {
         const villageCharacters = [
             { name: 'The Mayor', slug: 'mayor' },
             { name: 'The Doctor', slug: 'doctor' },
@@ -115,10 +115,18 @@ export default function Lobby() {
             ...shuffledRemainingCharacters.slice(0, game.players.length - requiredCharacters.length),
         ];
 
-        const murderers = shuffledPlayers
-            .slice(0, game.numTraitors)
-            .map((p) => p.uid);
+        let murderers = [];
 
+        if (randomize) {
+            murderers = shuffledPlayers.slice(0, game.numTraitors).map((p) => p.uid);
+        } else {
+            const hostPlayer = shuffledPlayers.find((p) => p.uid === game.hostId);
+            const remainingPlayers = shuffledPlayers.filter((p) => p.uid !== game.hostId);
+            murderers = [
+                hostPlayer?.uid,
+                ...remainingPlayers.slice(0, game.numTraitors - 1).map((p) => p.uid),
+            ].filter(Boolean);
+        }
         // Assign characters to players
         const updatedPlayers = shuffledPlayers.map((p, index) => {
             const character = selectedCharacters[index];
@@ -164,7 +172,7 @@ export default function Lobby() {
 
                     {isHost && (
                         <button
-                            onClick={startGame}
+                            onClick={startGame(false)}
                             className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded text-lg font-bold"
                         >
                             Start Game
