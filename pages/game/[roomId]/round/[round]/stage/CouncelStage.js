@@ -29,6 +29,7 @@ export default function CouncelStage({ roomId, round, stage }) {
 
     const handleStartVoting = async () => {
         await startVotingForAllPlayers(roomId);
+
     };
 
     const handleVotesSubmitted = async (selectedVotes) => {
@@ -141,6 +142,8 @@ export default function CouncelStage({ roomId, round, stage }) {
                                     players={players}
                                     currentUser={currentUser}
                                     onVotesSubmitted={handleVotesSubmitted}
+                                    voteCount={1}
+
                                 />
                             </div>
                         )}

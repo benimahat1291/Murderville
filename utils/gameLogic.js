@@ -128,18 +128,11 @@ export async function saveVotesToFirestore(roomId, currentRound, selectedVotes, 
 }
 
 // Function to generate random votes for bots
-function generateRandomVotes(players, botUid, maxVotes = 3) {
+function generateRandomVotes(players, botUid, maxVotes = 1) {
     const voteOptions = players.filter(p => p.uid !== botUid && p.alive);
-    const randomVotes = new Set();
-
-    while (randomVotes.size < maxVotes && randomVotes.size < voteOptions.length) {
-        const randomIndex = Math.floor(Math.random() * voteOptions.length);
-        randomVotes.add(voteOptions[randomIndex].uid);
-    }
-
-    return Array.from(randomVotes);
+    const randomIndex = Math.floor(Math.random() * voteOptions.length);
+    return [voteOptions[randomIndex].uid];
 }
-
 export async function startVotingForAllPlayers(roomId) {
     const gameRef = doc(db, 'games', roomId);
     await updateDoc(gameRef, { votingStarted: true, votingComplete: false });
