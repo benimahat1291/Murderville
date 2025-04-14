@@ -28,27 +28,55 @@ export default function CouncelVoting({ players, currentUser, onVotesSubmitted, 
     }
 
     return (
-        <div className="space-y-4">
-            <h2 className="text-xl font-bold">Vote for who you suspect!</h2>
-            <p>You must vote for {maxVotes} players.</p>
-            <div className="space-y-2 space-x-2 flex flex-wrap">
-                {voteOptions.map(player => (
-                    <li key={player.uid} className="flex items-center space-x-2">
-                        <button
-                            onClick={() => handleVote(player.uid)}
-                            className={`px-4 py-2 border rounded ${selectedVotes.includes(player.uid) ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
+        <div className="w-full px-4 sm:px-6 md:px-0 max-w-6xl mx-auto mt-6 text-white font-pixel">
+            <h2 className="text-xl text-yellow-400 mb-2 text-center">🔍 Vote for Who You Suspect!</h2>
+            <p className="text-sm text-center mb-6 text-gray-300">You must vote for {maxVotes} players.</p>
+
+            <div className="grid grid-cols-3  ">
+                {voteOptions.map((player) => {
+                    const isSelected = selectedVotes.includes(player.uid);
+
+                    return (
+                        <div
+                            key={player.uid}
+                            className={`relative w-full overflow-hidden border-2 rounded-md shadow-md transition-all duration-300 ${isSelected ? 'border-red-600' : 'border-zinc-700'
+                                }`}
                         >
-                            {player.name}-{player.character}
-                        </button>
-                    </li>
-                ))}
+                            <img
+                                src={`/characters/${player.characterSlug || 'default'}.webp`}
+                                alt={player.character}
+                                onError={(e) => (e.currentTarget.src = '/characters/default.webp')}
+                                className="w-full h-40 object-cover"
+                            />
+
+                            <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-between p-2 text-xs text-white font-mono">
+                                <div className="text-center font-bold">
+                                    <p>{player.character}</p>
+                                    <p className="italic text-gray-300">{player.name}</p>
+                                </div>
+
+                                <button
+                                    onClick={() => handleVote(player.uid)}
+                                    className={`text-[10px] font-bold px-2 py-1 rounded shadow-md mt-2 transition ${isSelected ? 'bg-red-600 text-white' : 'bg-black hover:bg-red-700'
+                                        }`}
+                                >
+                                    {isSelected ? '✅ Voted' : '🎯 Vote'}
+                                </button>
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
-            <button
-                onClick={submitVotes}
-                className="mt-4 px-6 py-2 bg-green-500 text-white rounded"
-            >
-                Submit Votes
-            </button>
+
+            <div className="text-center mt-6">
+                <button
+                    onClick={submitVotes}
+                    className="px-6 py-2 text-sm sm:text-base font-bold bg-green-600 hover:bg-green-700 text-white rounded shadow-lg transition"
+                >
+                    ✅ Submit Votes
+                </button>
+            </div>
         </div>
+
     );
 }

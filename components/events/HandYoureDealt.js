@@ -8,20 +8,19 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
     const [currentPlayer, setCurrentPlayer] = useState(null);
     const [eventData, setEventData] = useState(null);
 
+    console.log(eventData, "eventData");
+
     const roundKey = String(currentRound);
 
-    // Fetch or initialize the event
     useEffect(() => {
         if (!gameId || !roundKey) return;
 
         const fetchOrInitializeEvent = async () => {
             const gameRef = doc(db, "games", gameId);
             const gameSnap = await getDoc(gameRef);
-
             if (gameSnap.exists()) {
                 const gameData = gameSnap.data();
                 const event = gameData.events?.[roundKey];
-
                 if (!event) {
                     await initializeGame(gameId, currentRound);
                 } else {
@@ -33,7 +32,6 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
         fetchOrInitializeEvent();
     }, [gameId, roundKey]);
 
-    // Realtime updates and results check
     useEffect(() => {
         if (!gameId || !roundKey) return;
 
@@ -42,14 +40,12 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
 
         const unsubscribe = onSnapshot(gameRef, (snap) => {
             if (!snap.exists()) return;
-
             const gameData = snap.data();
             const event = gameData.events?.[roundKey];
 
             if (event && Array.isArray(event.players)) {
                 setAlivePlayers(event.players);
                 setEventData(event);
-
                 const found = event.players.find((p) => p.uid === currentUser.uid);
                 setCurrentPlayer(found || null);
 
@@ -67,31 +63,23 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
         return () => unsubscribe();
     }, [gameId, roundKey, currentUser?.uid]);
 
-    // Host starts the round
     const startGame = async () => {
         const gameRef = doc(db, "games", gameId);
         const gameSnap = await getDoc(gameRef);
         if (!gameSnap.exists()) return;
-
         const gameData = gameSnap.data();
         const event = gameData.events?.[roundKey];
         if (!event) return;
-
-        await updateDoc(gameRef, {
-            [`events.${roundKey}.gameState`]: "inProgress",
-        });
+        await updateDoc(gameRef, { [`events.${roundKey}.gameState`]: "inProgress" });
     };
 
-    // Player decision handler
     const handleDecision = async (decision) => {
         if (!gameId || !roundKey || !currentPlayer) return;
-
         const gameRef = doc(db, "games", gameId);
 
         await runTransaction(db, async (transaction) => {
             const snap = await transaction.get(gameRef);
             if (!snap.exists()) return;
-
             const gameData = snap.data();
             const event = gameData.events?.[roundKey];
             if (!event) return;
@@ -106,7 +94,6 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
         });
     };
 
-    // Results calculation
     const calculateResults = async (gameId, roundKey, players) => {
         const gameRef = doc(db, "games", gameId);
 
@@ -121,9 +108,9 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
             const didNotPlay = players.filter((p) => p.choice === false).map((p) => p.uid);
             const playing = players.filter((p) => p.choice === true);
 
-            const sorted = [...playing].sort((a, b) => {
-                return b.cards[0] + b.cards[1] - (a.cards[0] + a.cards[1]);
-            });
+            const sorted = [...playing].sort((a, b) =>
+                b.cards[0] + b.cards[1] - (a.cards[0] + a.cards[1])
+            );
 
             const half = Math.ceil(sorted.length / 2);
             const winners = sorted.slice(0, half);
@@ -138,8 +125,7 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
         });
     };
 
-    // Final payout by host
-    const finishTheGame = async (gameId, roundKey) => {
+    const finishTheGame = async () => {
         const gameRef = doc(db, "games", gameId);
 
         await runTransaction(db, async (transaction) => {
@@ -151,11 +137,8 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
             if (!event) return;
 
             const updatedPlayers = gameData.players.map((p) => {
-                if (event.winners.includes(p.uid)) {
-                    return { ...p, gold: (p.gold || 0) + 2 };
-                } else if (event.losers.includes(p.uid)) {
-                    return { ...p, gold: (p.gold || 0) - 2 };
-                }
+                if (event.winners.includes(p.uid)) return { ...p, gold: (p.gold || 0) + 2 };
+                if (event.losers.includes(p.uid)) return { ...p, gold: (p.gold || 0) - 2 };
                 return p;
             });
 
@@ -167,95 +150,153 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
     };
 
     return (
-        <div className=" bg-black bg-opacity-70 text-white rounded-lg shadow-lg w-full max-w-3xl mx-auto font-mono">
-            <h2 className="font-pixel text-xl mb-4 text-center">🃏 The Hand You’re Dealt</h2>
+        <div
+            className="flex items-center justify-center "
+        >
+            <div className="w-full max-w-3xl bg-red-500 bg-opacity-20 rounded-lg  p-4 text-white font-pixel">
+                <h2 className="text-sm text-center text-red-500 mb-6"><span className="text-xl">🃏</span> The Hand You’re Dealt</h2>
+                <img
+                    src={`/games/hand-your-dealt.webp`}
+                    alt={"Hand-Youre-Dealt"}
+                    className="rounded-lg w-full h-40 object-cover border-b border-zinc-800"
+                />
 
-            <div className="mb-6 p-4 rounded border border-blue-500 bg-blue-900 bg-opacity-30 text-blue-100">
-                <h3 className="text-lg font-bold mb-2">🎴 How It Works</h3>
-                <ul className="list-disc pl-5 space-y-1 text-sm">
-                    <li>You get 2 random cards.</li>
-                    <li>Choose to <span className="text-green-400">Play</span> (-2 coins) or <span className="text-red-400">Fold</span>.</li>
-                    <li>Top half of players who played = <span className="text-green-400">+2 coins</span></li>
-                    <li>Bottom half lose = <span className="text-red-400">-2 coins</span></li>
-                    <li>Players who fold don’t win or lose anything.</li>
-                </ul>
-            </div>
-
-            {!eventData && <p className="text-center">Loading event...</p>}
-
-            {eventData?.gameState === "waiting" && (
-                <div className="p-4 bg-yellow-200 text-yellow-800 rounded">
-                    {isHost ? (
-                        <>
-                            <p className="mb-2 font-semibold">You’re the host. Start the round:</p>
-                            <button
-                                onClick={startGame}
-                                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                            >
-                                ▶️ Start Game
-                            </button>
-                        </>
-                    ) : (
-                        <p>Waiting for the host to start the game...</p>
-                    )}
+                <div className="mb-6 p-4  bg-black bg-opacity-50 rounded-xl mt-2  text-blue-100 ">
+                    <h3 className="text-sm font-bold mb-2">📜 How It Works</h3>
+                    <ul className="list-disc pl-6 text-[8px] space-y-1">
+                        <li>You get 2 random cards.(A=1,j=11,Q=12,K=13)</li>
+                        <li>Choose to <span className="text-green-400">Play</span> or <span className="text-red-400">Fold</span>.</li>
+                        <li>To win The sum of your cards must be in the top half of players who play</li>
+                        <li>win = <span className="text-green-400">+4 coins</span></li>
+                        <li>play = <span className="text-red-400">-2 coins</span></li>
+                    </ul>
                 </div>
-            )}
 
-            {eventData?.gameState === "inProgress" && currentPlayer && (
-                <>
-                    <div className="mt-4">
-                        <p className="mb-2 font-semibold">🎭 You are <strong>{currentPlayer.name}</strong></p>
-                        <p className="mb-2">🃏 Your cards: <strong>{currentPlayer.cards?.join(", ")}</strong></p>
+                {!eventData && <p className="text-center">🕒 Loading event...</p>}
 
-                        {currentPlayer.gold > 1 && (
-                            <button
-                                onClick={() => handleDecision(true)}
-                                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mr-2"
-                            >
-                                ✅ Play
-                            </button>
+                {eventData?.gameState === "waiting" && (
+                    <div className="p-4 text-center bg-yellow-100 text-yellow-800 rounded-lg font-mono">
+                        {isHost ? (
+                            <>
+                                <p className="mb-2 font-semibold">You’re the host. Ready to begin?</p>
+                                <button onClick={startGame} className="bg-blue-600 px-4 py-2 rounded text-white hover:bg-blue-700">
+                                    ▶️ Start Round
+                                </button>
+                            </>
+                        ) : (
+                            <p>⏳ Waiting for the host to start the round...</p>
                         )}
+                    </div>
+                )}
+
+                {console.log("eventData?.gameState", currentPlayer)}
+
+                {eventData?.gameState === "inProgress" && currentPlayer && (
+                    <>
+                        <div className="mt-6 text-center text-sm">
+                            <p className="mb-1 text-xs text-gray-300">You are dealt..</p>
+                            <div className="flex justify-center my-4">
+                                {currentPlayer?.cards && currentPlayer?.cards.map((card, i) => (
+                                    <img key={i} src={card.image} alt={`Card ${card.rank} of ${card.suit}`} className="w-1/2 h-auto mr-2" />
+                                ))}
+                            </div>
+                            {currentPlayer.gold > 1 && (
+                                <button onClick={() => handleDecision(true)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mr-2">
+                                    ✅ Play
+                                </button>
+                            )}
+                            <button onClick={() => handleDecision(false)} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                                ❌ Fold
+                            </button>
+                        </div>
+                        {/* player dicision list */}
+                        <div className="mt-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+                                {alivePlayers
+                                    .slice()
+                                    .sort((a, b) => {
+                                        const val = (x) => x.choice === true ? 0 : x.choice === false ? 1 : 2;
+                                        return val(a) - val(b);
+                                    })
+                                    .map((p) => (
+                                        <div
+                                            key={p.uid}
+                                            className="relative w-full  overflow-hidden border border-zinc-700 shadow-md"
+                                        >
+                                            <img
+                                                src={`/characters/${p.characterSlug || 'default'}.webp`}
+                                                alt={p.character}
+                                                className="w-full h-full object-cover"
+                                            />
+
+                                            <div className="absolute h-full inset-0 bg-black bg-opacity-50 flex flex-col justify-between items-center text-white text-xs font-mono p-2">
+                                                <p className="font-bold text-center text-[8px]">{p.character}</p>
+                                                <p>
+                                                    <span className="text-2xl text-[orange]">
+                                                        {p.choice === null ? '?' : p.choice ? '✅' : '❌'}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                    ))}
+                            </div>
+                        </div>
+
+                    </>
+                )}
+
+                {eventData?.gameState === "results-ready" && isHost && (
+                    <div className="text-center mt-6">
                         <button
-                            onClick={() => handleDecision(false)}
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded"
+                            onClick={finishTheGame}
+                            className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded  text-lg font-bold"
+
                         >
-                            ❌ Fold
+                            Reveal Results
                         </button>
                     </div>
+                )}
+                {/* Result Section */}
+                {eventData?.gameState === "completed" && <div className="grid grid-cols-3">
+                    {alivePlayers
+                        .slice()
+                        .sort((a, b) => {
+                            const getPriority = (p) => {
+                                if (eventData?.winners.includes(p.uid)) return 0;
+                                if (eventData?.losers.includes(p.uid)) return 1;
+                                if (eventData?.didnotplay.includes(p.uid)) return 2;
+                                return 3;
+                            };
+                            return getPriority(a) - getPriority(b);
+                        })
+                        .map((p) => (
+                            <div
+                                key={p.uid}
+                                className="relative w-full  flex flex-col justify-between overflow-hidden border border-zinc-700 shadow-md h-full"
+                            >
+                                <img
+                                    src={`/characters/${p.characterSlug || 'default'}.webp`}
+                                    alt={p.character}
+                                    className="w-full object-cover"
+                                />
+                                <div className="absolute h-full inset-0 bg-black bg-opacity-50 flex flex-col justify-between items-center text-white text-xs font-mono p-2">
+                                    <p className="font-bold text-center text-[8px]">{p.character}</p>
+                                    <p>
+                                        {eventData?.winners.includes(p.uid)
+                                            ? <span className="text-green-500 flex flex-col">✅ Winner <span className="text-[gold]">+2 gold</span></span>
+                                            : eventData?.losers.includes(p.uid)
+                                                ? <span className="red-green-500 flex flex-col">❌ Loser <span className="text-red-500">-2 gold</span></span>
+                                                : eventData?.didnotplay.includes(p.uid)
+                                                    ? <span className="red-green-500 flex flex-col">Folded </span>
+                                                    : '❓ Undecided'}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                </div>}
 
-                    <div className="mt-6">
-                        <h3 className="font-bold mb-2">Other Players</h3>
-                        <ul className="space-y-1 text-sm">
-                            {alivePlayers.map((p) => (
-                                <li key={p.uid} className="flex justify-between w-56">
-                                    <span>{p.name}</span>
-                                    <span>{p.choice === null ? '❓' : p.choice ? '✅' : '❌'}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </>
-            )}
-
-            {eventData?.gameState === "results-ready" && isHost && (
-                <div className="mt-6 text-center">
-                    <button
-                        onClick={() => finishTheGame(gameId, roundKey)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded"
-                    >
-                        ✅ Finish & Distribute Coins
-                    </button>
-                </div>
-            )}
-
-            {eventData?.gameState === "completed" && (
-                <div className="mt-6">
-                    <h3 className="text-lg font-bold mb-2">🏁 Round Results</h3>
-                    <p>🏆 Winners: {eventData.winners.join(", ")}</p>
-                    <p>💀 Losers: {eventData.losers.join(", ")}</p>
-                    <p>🪑 Sat Out: {eventData.didnotplay.join(", ")}</p>
-                </div>
-            )}
+            </div>
         </div>
     );
 }

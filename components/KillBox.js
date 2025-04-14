@@ -33,52 +33,49 @@ const KillBox = ({ murderers, gameData, roomId, currentPlayer }) => {
     };
 
     return (
-        <div className="w-full max-w-2xl mt-6 bg-red-900 bg-opacity-50 border border-red-600 text-white p-4 rounded-lg shadow-lg">
-            <h2 className="font-pixel text-lg mb-4 text-center text-red-300">🩸 Murderer Targets</h2>
+        <div className='bg-black w-full h-full p-2 rounded'>
+            <strong className='text-white text-sm'>Kill Box</strong>
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-            <ul className="space-y-3 text-sm">
                 {murderers.map((m) => {
                     const targetId = targets[m.uid];
                     const targetPlayer = gameData.players.find((p) => p.uid === targetId);
 
-                    return (
-                        <li key={m.uid} className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                            <div className="flex items-center gap-3">
-                                <span className="font-bold">{m.name}</span>
-                                <span className="italic text-gray-300">({m.character})</span>
-                                {m.alive ? (
-                                    <span title="Alive" className="text-green-400">🟢</span>
-                                ) : (
-                                    <span title="Dead" className="text-red-400">🔴</span>
-                                )}
-                            </div>
+                    let actionText = "❓ Undecided";
+                    if (targetId === 'skip') {
+                        actionText = "⏭️ Skipped";
+                    } else if (targetPlayer) {
+                        actionText = <span className='flex items-center'><span className='text-2xl mr-2'>🎯</span>{targetPlayer.character}</span>;
+                    }
 
-                            <div className="text-gray-300 pl-2 sm:pl-0 text-sm mt-1 sm:mt-0">
-                                {targetId === 'skip' && (
-                                    <span className="text-yellow-400">⏭️ Skipped</span>
-                                )}
-                                {targetPlayer && targetId !== 'skip' && (
-                                    <span className="text-blue-300">
-                                        🎯 {targetPlayer.name} <span className="italic text-xs">({targetPlayer.character})</span>
-                                    </span>
-                                )}
+                    return (
+                        <div
+                            key={m.uid}
+                            className="relative w-full overflow-hidden border border-red-700 shadow-md"
+                        >
+                            <img
+                                src={`/characters/${m.characterSlug || 'default'}.webp`}
+                                alt={m.character}
+                                className="w-full h-40 object-cover"
+                            />
+
+                            <div className="absolute h-full inset-0 bg-black bg-opacity-60 flex flex-col justify-between items-center text-white text-xs font-mono p-2">
+                                <div className="text-center text-[8px] font-bold">
+                                    <p className='text-sm'>{m.character}</p>
+                                    <p className="italic text-gray-300">{m.name}</p>
+                                    <p>{m.alive ? '🟢 Alive' : '🔴 Dead'}</p>
+                                </div>
+                                <div className="text-center text-yellow-300 text-[10px] font-bold">
+                                    {actionText}
+                                </div>
                             </div>
-                        </li>
+                        </div>
                     );
                 })}
-            </ul>
-
-            {currentPlayer?.alive && currentPlayer?.isMurderer && (
-                <div className="flex justify-center mt-6">
-                    <button
-                        onClick={handleSkipKill}
-                        className="bg-gray-600 hover:bg-gray-700 text-white font-bold px-6 py-2 rounded shadow"
-                    >
-                        ⏭️ Skip the Kill Tonight
-                    </button>
-                </div>
-            )}
+            </div>
         </div>
+
+
     );
 };
 

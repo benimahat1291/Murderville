@@ -47,9 +47,15 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
 
 
             {isHost && (
-                <button onClick={() => advanceToNextStageOrRound(roomId)} className="mt-4 bg-green-500 px-4 py-2 text-white rounded">
-                    Next Stage
-                </button>
+                <div className='w-full text-center'>
+                    <button onClick={() => advanceToNextStageOrRound(roomId)} c
+                        className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded  text-lg font-bold"
+
+                    >
+                        Next Stage
+                    </button>
+                </div>
+
             )}
         </div>
     );

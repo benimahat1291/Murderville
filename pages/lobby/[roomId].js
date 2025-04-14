@@ -80,29 +80,48 @@ export default function Lobby() {
             { name: 'The Priest', slug: 'priest' },
             { name: 'The Baker', slug: 'baker' },
             { name: 'The Hunter', slug: 'hunter' },
+            { name: 'The Gaurd', slug: 'gaurd' },
             { name: 'The Fortune Teller', slug: 'fortune-teller' },
             { name: 'The Drunkard', slug: 'drunkard' },
-            { name: 'The Tailor', slug: 'tailor' },
+            { name: 'The Sherif', slug: 'sherif' },
             { name: 'The Outcast', slug: 'outcast' },
             { name: 'The Stranger', slug: 'stranger' },
+        ];
+
+        const requiredCharacters = [
+            { name: 'The Mayor', slug: 'mayor' },
+            { name: 'The Doctor', slug: 'doctor' },
+            { name: 'The Sherif', slug: 'sherif' },
+            { name: 'The Gaurd', slug: 'Gaurd' },
+            { name: 'The Fortune Teller', slug: 'fortune-teller' },
         ];
 
         const gameRef = doc(db, 'games', roomId);
         const snapshot = await getDoc(gameRef);
         const game = snapshot.data();
 
-        // Shuffle characters and players
-        const shuffledCharacters = [...villageCharacters].sort(() => Math.random() - 0.5);
         const shuffledPlayers = [...game.players].sort(() => Math.random() - 0.5);
 
-        // Select random murderers
+        const remainingCharacters = villageCharacters.filter(
+            (char) => !requiredCharacters.some((req) => req.slug === char.slug)
+        );
+
+        // Shuffle remaining characters
+        const shuffledRemainingCharacters = remainingCharacters.sort(() => Math.random() - 0.5);
+
+        // Combine required + remaining characters (just enough for the number of players)
+        const selectedCharacters = [
+            ...requiredCharacters,
+            ...shuffledRemainingCharacters.slice(0, game.players.length - requiredCharacters.length),
+        ];
+
         const murderers = shuffledPlayers
             .slice(0, game.numTraitors)
             .map((p) => p.uid);
 
-        // Assign roles
-        const updatedPlayers = game.players.map((p, index) => {
-            const character = shuffledCharacters[index];
+        // Assign characters to players
+        const updatedPlayers = shuffledPlayers.map((p, index) => {
+            const character = selectedCharacters[index];
             return {
                 ...p,
                 character: character ? character.name : 'Villager',

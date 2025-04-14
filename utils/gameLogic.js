@@ -90,6 +90,7 @@ export async function saveVotesToFirestore(roomId, currentRound, selectedVotes, 
                 uid: votedUid,
                 name: votedPlayer ? votedPlayer.name : "Unknown",
                 character: votedPlayer ? votedPlayer.character : "Unknown",
+                characterSlug: votedPlayer ? votedPlayer.characterSlug : "Unknown",
                 votes: voters,
                 voteCount: voteCounts[votedUid]
             };

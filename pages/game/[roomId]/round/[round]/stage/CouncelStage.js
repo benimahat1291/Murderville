@@ -97,48 +97,73 @@ export default function CouncelStage({ roomId, round, stage }) {
 
     const isHost = game.hostId === currentUser?.uid;
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold">Round {round} - Stage {stage}: Village Council</h1>
-            <p>Players vote to exile a player they think is a Murderer</p>
+        <div className="w-full max-w-3xl bg-opacity-20 rounded-lg p-4 text-white font-pixel mx-auto">
+            <div className="">
+                <h1 className="text-base text-white font-bold my-4"> {round}.{stage}) Council</h1>
 
-            {votingComplete ? (
-                <div className="mt-4">
-                    <CouncelResults votesResult={votesResult} />
+
+                <img
+                    src={`/wallpapers/council.webp`}
+                    alt={"Council Voting"}
+                    className="rounded-lg w-full h-40 object-cover border-b border-zinc-800"
+                />
+
+                <div className="mb-6 p-4 bg-black bg-opacity-50 rounded-xl mt-2 text-blue-100 text-[10px]">
+                    <h3 className="text-sm font-bold mb-2">📜 How It Works</h3>
+                    <ul className="list-disc pl-6 space-y-1">
+                        <li>All players vote to exile a player they suspect is a Murderer.</li>
+                        <li>The player with the most votes will be exiled (marked as dead).</li>
+                        <li>You may only vote once. Choose wisely.</li>
+                    </ul>
                 </div>
-            ) : (
-                <>
-                    {!votingStarted && isHost && (
+
+                {votingComplete ? (
+                    <div className="mt-4">
+                        <CouncelResults votesResult={votesResult} />
+                    </div>
+                ) : (
+                    <>
+                        {!votingStarted && isHost && (
+                            <div className="text-center mt-4">
+                                <button
+                                    onClick={handleStartVoting}
+                                    className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded  text-lg font-bold"
+
+                                >
+                                    ▶️ Start Voting
+                                </button>
+                            </div>
+                        )}
+
+                        {votingStarted && !allVotesSubmitted && (
+                            <div className="mt-4">
+                                <CouncelVoting
+                                    players={players}
+                                    currentUser={currentUser}
+                                    onVotesSubmitted={handleVotesSubmitted}
+                                />
+                            </div>
+                        )}
+
+                        {!votingStarted && !isHost && (
+                            <p className="text-gray-300 text-center">⏳ Waiting for voting to start...</p>
+                        )}
+                    </>
+                )}
+
+                {isHost && allVotesSubmitted && (
+                    <div className="text-center mt-6">
                         <button
-                            onClick={handleStartVoting}
-                            className="mt-4 bg-blue-500 px-4 py-2 text-white rounded"
+                            onClick={handleNext}
+                            className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white text-sm"
                         >
-                            Start Voting
+                            ✅ Next Stage
                         </button>
-                    )}
+                    </div>
+                )}
 
-                    {votingStarted && !allVotesSubmitted && (
-                        <CouncelVoting
-                            players={players}
-                            currentUser={currentUser}
-                            onVotesSubmitted={handleVotesSubmitted}
-                        />
-                    )}
-
-                    {!votingStarted && !isHost && (
-                        <p className="text-gray-500">Waiting for voting to start...</p>
-                    )}
-                </>
-            )}
-
-            {isHost && allVotesSubmitted && (
-                <button
-                    onClick={handleNext}
-                    className="mt-4 bg-green-500 px-4 py-2 text-white rounded"
-                >
-                    Next Stage
-                </button>
-            )}
-
+            </div>
         </div>
     );
+
 }

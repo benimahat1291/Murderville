@@ -24,17 +24,24 @@ export default function MarketStage({ roomId, round, stage }) {
     console.log("Game", game);
 
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold">Round {round} - Stage {stage}:Village Market</h1>
-            <strong>THIS STAGE IS CURRENTLY UNAVIALIABLE</strong>
-            <p>Choose to buy, use items, or trigger character abilities.</p>
+        <div className="">
+            <h1 className="text-base text-white font-bold"> {round}.{stage}) Market</h1>
+
+            <div className="text-center bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 my-4">
+                <strong className="text-red-500 block text-sm">⚠️ THIS STAGE IS CURRENTLY UNAVAILABLE</strong>
+                <p className="text-xs mt-2 text-gray-300">You’ll be able to buy items, use powers, or trigger abilities here soon.</p>
+            </div>
+
             {isHost && (
-                <button
-                    onClick={handleNext}
-                    className="mt-4 bg-green-500 px-4 py-2 text-white rounded"
-                >
-                    Next Stage
-                </button>
+                <div className='w-full text-center'>
+                    <button
+                        onClick={handleNext}
+                        className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded  text-lg font-bold"
+                    >
+                        Next Stage
+                    </button>
+                </div>
+
             )}
         </div>
     );

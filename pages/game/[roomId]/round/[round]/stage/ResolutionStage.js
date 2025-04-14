@@ -1,5 +1,4 @@
 import useGameData from '../../../../../../hooks/useGameData';
-import PlayerList from '../../../../../../components/PlayerList';
 import { advanceToNextStageOrRound } from '../../../../../../utils/gameLogic';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
@@ -24,13 +23,11 @@ export default function ResolutionStage({ roomId, round, stage }) {
     useEffect(() => {
         if (!game.killBox || !players) return;
 
-        // Get current round killBox entry
         const roundKillBoxIndex = game.killBox.findIndex(kb => kb.round === game.currentRound);
         if (roundKillBoxIndex === -1) return;
 
         const roundKillBox = game.killBox[roundKillBoxIndex];
 
-        // If a player has already been killed in this round, exit early
         if (roundKillBox.killed) {
             setKilledPlayer(roundKillBox.killed);
             return;
@@ -38,10 +35,8 @@ export default function ResolutionStage({ roomId, round, stage }) {
 
         if (!roundKillBox.targets) return;
 
-        // Get a list of alive murderers
         const aliveMurderers = players.filter(player => player.isMurderer && player.alive).map(p => p.uid);
 
-        // Count votes, only considering votes from alive murderers
         const targetCounts = {};
         Object.entries(roundKillBox.targets).forEach(([murdererUid, targetUid]) => {
             if (aliveMurderers.includes(murdererUid)) {
@@ -49,14 +44,11 @@ export default function ResolutionStage({ roomId, round, stage }) {
             }
         });
 
-        // If no valid votes exist, exit early
         if (Object.keys(targetCounts).length === 0) return;
 
-        // Find player with most votes
         const maxVotes = Math.max(...Object.values(targetCounts));
         const potentialKills = Object.keys(targetCounts).filter(uid => targetCounts[uid] === maxVotes);
 
-        // Pick the most targeted or a random one if there's a tie
         const selectedKillUid = potentialKills.length === 1
             ? potentialKills[0]
             : potentialKills[Math.floor(Math.random() * potentialKills.length)];
@@ -66,7 +58,6 @@ export default function ResolutionStage({ roomId, round, stage }) {
 
         setKilledPlayer(killedPlayerData);
 
-        // Update Firestore
         const gameRef = doc(db, 'games', roomId);
         const updatedPlayers = players.map(player =>
             player.uid === killedPlayerData.uid ? { ...player, alive: false } : player
@@ -93,23 +84,58 @@ export default function ResolutionStage({ roomId, round, stage }) {
     const isHost = game.hostId === currentUser?.uid;
 
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold">Round {round} - Stage {stage}: The Reveal</h1>
-            <p>Results revealed. Who was exiled/killed?</p>
+        <div className="w-full max-w-3xl bg-red-500 bg-opacity-20 rounded-lg p-6 text-white font-pixel mx-auto">
+            <h2 className="text-sm text-center text-red-500 mb-6">
+                <span className="text-xl">🩸</span> The Reveal
+            </h2>
 
-            {killedPlayer && (
-                <p className="mt-2 text-red-500 font-bold">
-                    {killedPlayer.name} ({killedPlayer.character}) was eliminated!
-                </p>
-            )}
+            <img
+                src="/wallpapers/murder.webp"
+                alt="Reveal"
+                className=" h-full object-cover rounded-lg border-b border-zinc-700 mb-4"
+            />
+
+            <div className="bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 text-center text-xs">
+                <p className="text-gray-200">Murderers made their move... here's what happened this round:</p>
+
+                {killedPlayer ? (
+                    <div className=" font-bold mt-3 text-lg">
+                        <span className='text-xs'>
+                            ☠️ player killed was!
+
+                        </span>
+                        <span className='flex flex-col my-4'>
+
+                            <span className='text-red-400'>
+                                {killedPlayer.character}
+                            </span>
+                            <span className='font-light text-gray-500 text-sm'>
+                                {killedPlayer.name}
+
+                            </span>
+                        </span>
+
+                        <img
+                            src={`/characters/${killedPlayer.characterSlug}.webp`}
+                            alt="Reveal"
+                            className=" h-full object-cover rounded-lg border-b border-zinc-700 mb-4"
+                        />
+
+                    </div>
+                ) : (
+                    <p className="text-green-400 font-bold mt-3 text-sm">🌙 No one was killed this round.</p>
+                )}
+            </div>
 
             {isHost && (
-                <button
-                    onClick={handleNext}
-                    className="mt-4 bg-green-500 px-4 py-2 text-white rounded"
-                >
-                    Next Stage
-                </button>
+                <div className="text-center mt-6">
+                    <button
+                        onClick={handleNext}
+                        className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white text-sm"
+                    >
+                        ✅ Next Stage
+                    </button>
+                </div>
             )}
         </div>
     );

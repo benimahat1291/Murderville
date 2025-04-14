@@ -6,8 +6,6 @@ const db = getFirestore(app);
 export default function PlayerList({ players, currentPlayer, currentUser, gameData }) {
     const currentRound = gameData.currentRound;
 
-    console.log(players)
-
     const handleTargetSelection = async (targetUid) => {
         if (!gameData || !currentUser) return;
 
@@ -37,49 +35,57 @@ export default function PlayerList({ players, currentPlayer, currentUser, gameDa
     };
 
     return (
-        <div className="w-full max-w-5xl mx-auto mt-6 text-white">
-            <h2 className="text-lg font-pixel mb-4">🧑 Players</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="w-full px-4 sm:px-6 md:px-0 max-w-6xl mx-auto mt-6 text-white">
+            <div className="grid grid-cols-3 ">
                 {players.map((p) => {
                     const isAlive = p.alive;
                     const isTargetable = currentPlayer?.isMurderer && !p.isMurderer && isAlive;
-                    console.log(p)
+
                     return (
                         <div
                             key={p.uid}
-                            className={`flex flex-col justify-between h-full bg-black bg-opacity-70 border border-gray-700 p-4 rounded-lg shadow-lg`}
+                            className="relative w-full overflow-hidden border border-zinc-700 shadow-md"
                         >
-                            {/* Placeholder image or role-based character art */}
                             <img
-                                src={`/characters/${p.characterSlug}.webp`}
-                                alt={`${p.character}`}
-                                className="w-full h-32 object-cover rounded mb-4 border"
+                                src={`/characters/${p.characterSlug || 'default'}.webp`}
+                                alt={p.character}
+                                onError={(e) => e.currentTarget.src = '/characters/default.webp'}
+                                className="w-full h-full object-cover"
                             />
-                            <div className="space-y-1 text-sm">
-                                <p><span className="font-bold">Character:</span> {p.character}</p>
-                                <p><span className="font-bold">Name:</span> <span className="italic text-gray-300">{p.name}</span></p>
-                                <p>
-                                    <span className="font-bold">Status:</span>{' '}
-                                    {isAlive ? (
-                                        <span className="text-green-400">🟢 Alive</span>
-                                    ) : (
-                                        <span className="text-red-400">🔴 Dead</span>
-                                    )}
-                                </p>
-                            </div>
 
-                            {isTargetable && (
-                                <button
-                                    onClick={() => handleTargetSelection(p.uid)}
-                                    className="mt-4 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1 rounded shadow"
-                                >
-                                    🎯 Target
-                                </button>
-                            )}
+                            <div className={`absolute h-full inset-0 bg-black ${isAlive ? "bg-opacity-50 text-white" : "bg-opacity-75 text-gray-500"}  flex flex-col justify-between   text-xs font-mono p-2`}>
+                                <div className="font-bold">
+                                    <p className='text-xs'>{p.character}</p>
+                                    <p className="italic  ">{p.name}</p>
+                                </div>
+                                <p className={isAlive ? 'text-green-400' : 'text-red-400'}>
+                                    {isAlive ?
+                                        isTargetable ?
+                                            <button
+                                                onClick={() => handleTargetSelection(p.uid)}
+                                                className=" bg-black text-white text-[10px] font-bold px-2 py-1 rounded shadow-md transition mt-1"
+                                            >
+                                                🎯 Target
+                                            </button>
+                                            :
+                                            <span className=" hover:bg-red-700 text-green-500 text-[10px] font-bold px-2 py-1 rounded shadow-md transition mt-1">
+                                                🟢 Alive
+
+                                            </span>
+                                        :
+                                        <span className=" hover:bg-red-700 text-red-500 text-[10px] font-bold px-2 py-1 rounded shadow-md transition mt-1">
+                                            🔴 Dead
+                                        </span>
+                                    }
+
+                                </p>
+
+                            </div>
                         </div>
                     );
                 })}
             </div>
         </div>
     );
+
 }
