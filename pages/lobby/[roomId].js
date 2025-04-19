@@ -73,27 +73,119 @@ export default function Lobby() {
 
     const startGame = async (randomize = true) => {
         const villageCharacters = [
-            { name: 'The Mayor', slug: 'mayor' },
-            { name: 'The Doctor', slug: 'doctor' },
-            { name: 'The Blacksmith', slug: 'blacksmith' },
-            { name: 'The Innkeeper', slug: 'innkeeper' },
-            { name: 'The Priest', slug: 'priest' },
-            { name: 'The Baker', slug: 'baker' },
-            { name: 'The Hunter', slug: 'hunter' },
-            { name: 'The Gaurd', slug: 'gaurd' },
-            { name: 'The Fortune Teller', slug: 'fortune-teller' },
-            { name: 'The Drunkard', slug: 'drunkard' },
-            { name: 'The Sherif', slug: 'sherif' },
-            { name: 'The Outcast', slug: 'outcast' },
-            { name: 'The Stranger', slug: 'stranger' },
+            {
+                name: 'The Mayor',
+                slug: 'mayor',
+                ability: 'Has two votes per council. If killed, the next day phase is skipped due to chaos.',
+                items: []
+            },
+            {
+                name: 'The Doctor',
+                slug: 'doctor',
+                ability: 'Starts with a potion and injection. Potions cost -1 coin to use.',
+                items: [
+                    {
+                        item: 'Potion',
+                        slug: 'potion',
+                        description: "Heals a player that has been murdered! (player starts with 0 gold and no items).",
+                    },
+                    {
+                        item: 'Potion',
+                        slug: 'potion',
+                        description: "Heals a player that has been murdered! (player starts with 0 gold and no items).",
+                    }
+                ]
+
+            },
+            {
+                name: 'The Blacksmith',
+                slug: 'blacksmith',
+                ability: 'Can give a player a one-time shield to block a murder.',
+                items: []
+
+            },
+            {
+                name: 'The Innkeeper',
+                slug: 'innkeeper',
+                ability: 'Can block one player’s ability by hosting them at the inn.',
+                items: []
+
+            },
+            {
+                name: 'The Priest',
+                slug: 'priest',
+                ability: 'Can learn if a dead player was good or evil.',
+                items: []
+
+            },
+            {
+                name: 'The Baker',
+                slug: 'baker',
+                ability: 'If killed, the town skips the next night phase.',
+                items: []
+
+            },
+            {
+                name: 'The Hunter',
+                slug: 'hunter',
+                ability: 'If killed, can take another player down with them.',
+                items: []
+
+            },
+            {
+                name: 'The Gaurd',
+                slug: 'gaurd',
+                ability: 'Can protect one player from murder each night.',
+                items: []
+
+            },
+            {
+                name: 'The Fortune Teller',
+                slug: 'fortune-teller',
+                ability: 'Can peek at and choose between the next two events.',
+                items: []
+
+            },
+            {
+                name: 'The Drunkard',
+                slug: 'drunkard',
+                ability: 'No ability, but appears as a random good role to the fortune teller.',
+                items: []
+
+            },
+            {
+                name: 'The Sherif',
+                slug: 'sherif',
+                ability: 'Can check one player each night to see if they’re a murderer.',
+                items: []
+
+            },
+            {
+                name: 'The Outcast',
+                slug: 'outcast',
+                ability: 'Wins if voted out. Loses if villagers win. Looks suspicious but isn’t evil.',
+                items: []
+
+            },
+            {
+                name: 'The Stranger',
+                slug: 'stranger',
+                ability: 'Gains the ability of the player they voted for last.',
+                items: []
+
+            },
         ];
 
+
         const requiredCharacters = [
-            { name: 'The Mayor', slug: 'mayor' },
-            { name: 'The Doctor', slug: 'doctor' },
-            { name: 'The Sherif', slug: 'sherif' },
-            { name: 'The Gaurd', slug: 'Gaurd' },
-            { name: 'The Fortune Teller', slug: 'fortune-teller' },
+            villageCharacters.find(c => c.slug === 'mayor'),
+            villageCharacters.find(c => c.slug === 'doctor'),
+            villageCharacters.find(c => c.slug === 'sherif'),
+            villageCharacters.find(c => c.slug === 'gaurd'),
+            villageCharacters.find(c => c.slug === 'fortune-teller'),
+            villageCharacters.find(c => c.slug === 'priest'),
+
+
         ];
 
         const gameRef = doc(db, 'games', roomId);
@@ -134,6 +226,8 @@ export default function Lobby() {
                 ...p,
                 character: character ? character.name : 'Villager',
                 characterSlug: character ? character.slug : 'villager',
+                ability: character ? character.ability : "No abliity yet!",
+                items: character ? character.items : [],
                 isMurderer: murderers.includes(p.uid),
             };
         });
@@ -172,7 +266,7 @@ export default function Lobby() {
 
                     {isHost && (
                         <button
-                            onClick={startGame(false)}
+                            onClick={() => startGame(false)}
                             className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded text-lg font-bold"
                         >
                             Start Game

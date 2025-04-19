@@ -42,6 +42,7 @@ export default function Home() {
             isHost: true,
             isMurderer: null,
             character: null,
+            isProtected: false,
             gold: 3,
             items: [],
             alive: true,
@@ -56,6 +57,7 @@ export default function Home() {
             character: null,
             gold: 3,
             items: [],
+            isProtected: false,
             alive: true,
             isBot: true,
         }));

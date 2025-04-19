@@ -154,6 +154,7 @@ export default function StagePage() {
                 roomId={roomId}
                 round={round}
                 currentUser={currentUser}
+                currentPlayer={currentPlayer}
             />
 
             {gameData?.players?.length > 0 && (
