@@ -52,9 +52,15 @@ export default function ResolutionStage({ roomId, round, stage }) {
         const selectedKillUid = potentialKills.length === 1
             ? potentialKills[0]
             : potentialKills[Math.floor(Math.random() * potentialKills.length)];
-
         const killedPlayerData = players.find(p => p.uid === selectedKillUid);
         if (!killedPlayerData) return;
+
+        // ✅ If protected, skip killing
+        if (killedPlayerData.isProtected) {
+            console.log(`${killedPlayerData.name} was protected!`);
+            setKilledPlayer({ ...killedPlayerData, protected: true }); // optional: explicitly show "no one died"
+            return;
+        }
 
         setKilledPlayer(killedPlayerData);
 
@@ -75,6 +81,7 @@ export default function ResolutionStage({ roomId, round, stage }) {
         }).catch(error => {
             console.error("Error updating killed player:", error);
         });
+
     }, [game.killBox, players, game.currentRound, roomId, db]);
 
     const handleNext = async () => {
@@ -90,41 +97,38 @@ export default function ResolutionStage({ roomId, round, stage }) {
             </h2>
 
             <img
-                src="/wallpapers/murder.webp"
+                src={`/wallpapers/${killedPlayer?.isProtected ? "shield-protection.png" : "murder.webp"}`}
                 alt="Reveal"
                 className=" h-full object-cover rounded-lg border-b border-zinc-700 mb-4"
             />
 
             <div className="bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 text-center text-xs">
-                <p className="text-gray-200">Murderers made their move... here's what happened this round:</p>
 
                 {killedPlayer ? (
-                    <div className=" font-bold mt-3 text-lg">
-                        <span className='text-xs'>
-                            ☠️ player killed was!
-
-                        </span>
-                        <span className='flex flex-col my-4'>
-
-                            <span className='text-red-400'>
-                                {killedPlayer.character}
-                            </span>
-                            <span className='font-light text-gray-500 text-sm'>
-                                {killedPlayer.name}
-
-                            </span>
-                        </span>
-
-                        <img
-                            src={`/characters/${killedPlayer.characterSlug}.webp`}
-                            alt="Reveal"
-                            className=" h-full object-cover rounded-lg border-b border-zinc-700 mb-4"
-                        />
-
+                    <div className="font-bold mt-3 text-lg">
+                        {killedPlayer.protected ? (
+                            <>
+                                <p className="text-yellow-300 text-sm">🛡️ A murder was attempted, but the villager was protected!</p>
+                            </>
+                        ) : (
+                            <>
+                                <span className='text-xs'>☠️ player killed was!</span>
+                                <div className='flex flex-col my-4'>
+                                    <span className='text-red-400'>{killedPlayer.character}</span>
+                                    <span className='font-light text-gray-500 text-sm'>{killedPlayer.name}</span>
+                                </div>
+                                <img
+                                    src={`/characters/${killedPlayer.characterSlug}.webp`}
+                                    alt="Reveal"
+                                    className="h-full object-cover rounded-lg border-b border-zinc-700 mb-4"
+                                />
+                            </>
+                        )}
                     </div>
                 ) : (
                     <p className="text-green-400 font-bold mt-3 text-sm">🌙 No one was killed this round.</p>
                 )}
+
             </div>
 
             {isHost && (
