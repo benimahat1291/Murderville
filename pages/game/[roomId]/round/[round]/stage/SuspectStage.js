@@ -72,7 +72,7 @@ export default function SuspectStage({ roomId, round, stage, currentPlayer }) {
                 <Gaurd character={currentPlayer} />
             </div>}
             <div className="my-4">
-                <PlayerItems game={game} currentPlayer={currentPlayer} />
+                <PlayerItems stage={stage} game={game} currentPlayer={currentPlayer} />
             </div>
 
             {isHost && (

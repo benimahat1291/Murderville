@@ -29,10 +29,8 @@ const ITEMS = [
     }
 ];
 
-
-export default function VillageMarket({ game, currentPlayer }) {
+export default function VillageMarket({ game, currentPlayer, }) {
     const [message, setMessage] = useState("");
-
     const playerGold = currentPlayer?.gold || 0;
 
     const handlePurchase = async (item) => {
@@ -41,13 +39,20 @@ export default function VillageMarket({ game, currentPlayer }) {
             return;
         }
 
+        const newItem = {
+            id: crypto.randomUUID(), // ✅ Unique identifier
+            item: item.name,
+            slug: item.slug,
+            description: item.description
+        };
+
         const updatedPlayers = game.players.map((p) => {
             if (p.uid !== currentPlayer.uid) return p;
 
             return {
                 ...p,
                 gold: p.gold - item.price,
-                items: [...(p.items || []), { item: item.name, slug: item.slug, description: item.description }],
+                items: [...(p.items || []), newItem],
             };
         });
 
@@ -92,7 +97,6 @@ export default function VillageMarket({ game, currentPlayer }) {
                                 {item.description}
                             </div>
                         </div>
-
 
                         <button
                             className="bg-yellow-600 hover:bg-yellow-400 text-black font-semibold py-1 px-4 rounded disabled:opacity-40"

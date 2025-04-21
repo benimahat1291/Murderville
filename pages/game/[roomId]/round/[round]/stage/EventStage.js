@@ -13,10 +13,11 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
 
     useEffect(() => {
         if (!game || !roomId) return;
-
         const selectedEvent = gameEvents.theHandYoureDealt(game);
         setEvent(selectedEvent);
     }, [game, roomId]);
+
+
 
     const handleGameCompletion = (updatedPlayers) => {
         updateGame({ players: updatedPlayers });

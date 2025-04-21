@@ -2,28 +2,25 @@ import { doc, updateDoc } from "firebase/firestore";
 import { useState } from "react";
 import { db } from "../utils/firebase";
 
-const PlayerItems = ({ currentPlayer, game }) => {
-    const [selectingShieldTarget, setSelectingShieldTarget] = useState(false);
-    const [selectedTarget, setSelectedTarget] = useState(null);
+const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer }) => {
+    const [selectingShieldTargetId, setSelectingShieldTargetId] = useState(null);
+    const [usingPotionId, setUsingPotionId] = useState(null);
 
     if (!currentPlayer || !game) return null;
 
     const items = currentPlayer.items || [];
     const allPlayers = [currentPlayer, ...(game?.players?.filter(p => p.uid !== currentPlayer.uid) || [])];
 
-    const handleProtect = async (targetUid) => {
-        // Update the protected player
+    const handleProtect = async (targetUid, itemIdToRemove) => {
         const updatedPlayers = game.players.map(player => {
             if (player.uid === targetUid) {
                 return { ...player, isProtected: true };
             }
 
-            // Remove the shield from the current player
             if (player.uid === currentPlayer.uid) {
                 const updatedItems = [...(player.items || [])];
-                const shieldIndex = updatedItems.findIndex(item => item.slug === "shield");
-                if (shieldIndex !== -1) updatedItems.splice(shieldIndex, 1); // remove first shield
-
+                const indexToRemove = updatedItems.findIndex(item => item.id === itemIdToRemove);
+                if (indexToRemove !== -1) updatedItems.splice(indexToRemove, 1);
                 return { ...player, items: updatedItems };
             }
 
@@ -35,15 +32,56 @@ const PlayerItems = ({ currentPlayer, game }) => {
                 players: updatedPlayers,
             });
 
-            setSelectingShieldTarget(false);
-            setSelectedTarget(null);
+            setSelectingShieldTargetId(null);
         } catch (err) {
             console.error("Failed to update protection:", err);
         }
     };
 
+    const handleRevive = async (itemId) => {
+        const revivedPlayer = {
+            ...killedPlayer,
+            alive: true,
+            isRevived: true,
 
-    console.log("Current Player Items:", items, "All Players:", allPlayers, "Game:", game, "Current Player:", currentPlayer);
+        };
+
+        const updatedPlayers = game.players.map(player => {
+            if (player.uid === killedPlayer.uid) {
+                return revivedPlayer;
+            }
+
+            if (player.uid === currentPlayer.uid) {
+                const updatedItems = [...(player.items || [])];
+                const indexToRemove = updatedItems.findIndex(i => i.id === itemId);
+                if (indexToRemove !== -1) updatedItems.splice(indexToRemove, 1);
+                return { ...player, items: updatedItems };
+            }
+
+            return player;
+        });
+
+        const updatedKillBox = game.killBox.map((kb, index) =>
+            index === game.killBox.findIndex(kb => kb.round === game.currentRound)
+                ? { ...kb, killed: revivedPlayer }
+                : kb
+        );
+
+        try {
+            await updateDoc(doc(db, "games", game.roomId), {
+                players: updatedPlayers,
+                killBox: updatedKillBox
+            });
+
+            setUsingPotionId(null);
+            setKilledPlayer(revivedPlayer); // update local state for smoother UI transition
+        } catch (err) {
+            console.error("Failed to revive player:", err);
+        }
+    };
+
+
+    console.log("playerItems", killedPlayer, stage, currentPlayer)
 
     return (
         <div className="mt-6 text-white bg-black bg-opacity-50 p-4 rounded-lg border border-yellow-700">
@@ -53,7 +91,7 @@ const PlayerItems = ({ currentPlayer, game }) => {
                 <div className="space-y-2">
                     {items.map((item, index) => (
                         <div
-                            key={`${item.slug}-${index}`}
+                            key={item.id || `${item.slug}-${index}`}
                             className="flex flex-col bg-gray-900 px-4 py-2 rounded text-xs gap-2"
                         >
                             <div className="flex items-center gap-3">
@@ -62,31 +100,44 @@ const PlayerItems = ({ currentPlayer, game }) => {
                                     alt={item.item}
                                     className="w-10 h-10 object-contain rounded"
                                 />
-                                <span className="">{item.item}</span>
-                                {game?.currentStage === 4 && item.slug === "shield" && (
+                                <span>{item.item}</span>
+
+                                {stage === "4" && item.slug === "shield" && (
                                     <button
-                                        onClick={() => setSelectingShieldTarget(prev => !prev)}
+                                        onClick={() => setSelectingShieldTargetId(item.id)}
                                         className="bg-yellow-600 text-black px-2 py-1 ml-auto rounded"
+                                    >
+                                        Use
+                                    </button>
+                                )}
+
+                                {stage === "5" && item.slug === "potion" && killedPlayer && !killedPlayer.revived && (
+
+                                    <button
+                                        onClick={() => setUsingPotionId(item.id)}
+                                        className="bg-green-600 text-black px-2 py-1 ml-auto rounded"
                                     >
                                         Use
                                     </button>
                                 )}
                             </div>
 
-                            {/* Dropdown for selecting a player */}
-                            {selectingShieldTarget && (
+                            {selectingShieldTargetId === item.id && (
                                 <div className="mt-2">
                                     <p className="text-[10px] text-gray-300 mb-1">Select a player to protect:</p>
                                     <ul className="space-y-1 text-xs">
-                                        {allPlayers && allPlayers
+                                        {allPlayers
                                             .filter(player => player.alive)
                                             .map(player => (
-                                                <li key={player.uid} className="flex justify-between items-center bg-zinc-800 p-2 rounded">
+                                                <li
+                                                    key={player.uid}
+                                                    className="flex justify-between items-center bg-zinc-800 p-2 rounded"
+                                                >
                                                     <span>
                                                         {player.character} {player.uid === currentPlayer.uid && "(You)"}
                                                     </span>
                                                     <button
-                                                        onClick={() => handleProtect(player.uid)}
+                                                        onClick={() => handleProtect(player.uid, item.id)}
                                                         className="text-green-300 underline hover:text-green-500"
                                                     >
                                                         🛡️ Protect
@@ -94,6 +145,20 @@ const PlayerItems = ({ currentPlayer, game }) => {
                                                 </li>
                                             ))}
                                     </ul>
+                                </div>
+                            )}
+
+                            {usingPotionId === item.id && (
+                                <div className="mt-2">
+                                    <p className="text-[10px] text-gray-300 mb-1">
+                                        Do you want to revive {killedPlayer.character}?
+                                    </p>
+                                    <button
+                                        onClick={() => handleRevive(item.id)}
+                                        className="text-blue-300 underline hover:text-blue-500 text-xs"
+                                    >
+                                        🧪 Revive
+                                    </button>
                                 </div>
                             )}
                         </div>

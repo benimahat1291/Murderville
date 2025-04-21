@@ -43,6 +43,7 @@ export default function Home() {
             isMurderer: null,
             character: null,
             isProtected: false,
+            isRevived: false,
             gold: 3,
             items: [],
             alive: true,
@@ -58,6 +59,7 @@ export default function Home() {
             gold: 3,
             items: [],
             isProtected: false,
+            isRevived: false,
             alive: true,
             isBot: true,
         }));
