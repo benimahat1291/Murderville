@@ -1,11 +1,19 @@
 export const gameEvents = {
-    theHandYoureDealt: (game) => {
+    handYoureDealt: (game) => {
         if (!game || !game.players) return null;
         return {
             type: "The Hand You’re Dealt",
             message: "You have been dealt two random cards. Choose to play or fold."
         };
     },
+    missionDivide: (game) => {
+        if (!game || !game.players) return null;
+        return {
+            type: "A Town Divided",
+            message: "The town must split up into two groups and depart on a mission!"
+        };
+    },
+
 
     // villageFeast: (gameData) => {
     //     console.log("Village Feast Event: Players donate gold to the village.");

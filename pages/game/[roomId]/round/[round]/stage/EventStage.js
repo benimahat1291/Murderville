@@ -4,18 +4,29 @@ import useGameData from '../../../../../../hooks/useGameData';
 import { gameEvents, getRandomEvent } from '../../../../../../utils/gameEvents';
 import { advanceToNextStageOrRound } from '../../../../../../utils/gameLogic';
 import HandYoureDealt from '../../../../../../components/events/HandYoureDealt';
+import MissionDivide from '../../../../../../components/events/MissionDivide';
+
 
 export default function EventStage({ roomId, round, stage, currentUser }) {
+    console.log("Event STAGE", roomId, round, stage, currentUser)
     const { game, updateGame } = useGameData(roomId);
     const router = useRouter();
 
     const [event, setEvent] = useState(null);
 
     useEffect(() => {
-        if (!game || !roomId) return;
-        const selectedEvent = gameEvents.theHandYoureDealt(game);
+        if (!game || !roomId || !round) return;
+
+        let selectedEvent
+
+        if (round === "1") {
+            selectedEvent = gameEvents.handYoureDealt(game);
+        } else if (round === "2") {
+            selectedEvent = gameEvents.missionDivide(game);
+        }
+
         setEvent(selectedEvent);
-    }, [game, roomId]);
+    }, [game, roomId, round]);
 
 
 
@@ -41,9 +52,16 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
                     <>
                         <HandYoureDealt gameData={game} currentUser={currentUser} isHost={isHost} currentRound={round} gameId={roomId} players={game.players} onComplete={handleGameCompletion} />
                     </>
-                ) : (
-                    <p>Other event logic here...</p>
-                )}
+                ) : event?.type === "A Town Divided" ? ( // ✅ Ensure game.players is defined
+                    <>
+                        <MissionDivide gameData={game} currentUser={currentUser} isHost={isHost} currentRound={round} gameId={roomId} players={game.players} onComplete={handleGameCompletion} />
+                    </>
+                ) :
+
+
+                    (
+                        <p>Other event logic here...</p>
+                    )}
             </div>
 
 

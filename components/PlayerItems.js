@@ -5,11 +5,51 @@ import { db } from "../utils/firebase";
 const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer }) => {
     const [selectingShieldTargetId, setSelectingShieldTargetId] = useState(null);
     const [usingPotionId, setUsingPotionId] = useState(null);
-
+    const [usingTorchId, setUsingTorchId] = useState(null);
+    const [torchReveal, setTorchReveal] = useState(null);
     if (!currentPlayer || !game) return null;
 
     const items = currentPlayer.items || [];
     const allPlayers = [currentPlayer, ...(game?.players?.filter(p => p.uid !== currentPlayer.uid) || [])];
+    const handleTorchReveal = async (targetUid, itemIdToRemove) => {
+        const target = game.players.find(p => p.uid === targetUid);
+        if (!target) return;
+
+        // First, handle the reveal logic
+        setTorchReveal({
+            character: target.character,
+            isMurderer: target.isMurderer,
+        });
+
+        // Now handle the removal of the item (if provided)
+        const updatedPlayers = game.players.map(player => {
+            if (player.uid === targetUid) {
+                return { ...player, isRevealed: true }; // Adding an example flag for reveal (optional)
+            }
+
+            if (player.uid === currentPlayer.uid) {
+                const updatedItems = [...(player.items || [])];
+                const indexToRemove = updatedItems.findIndex(item => item.id === itemIdToRemove);
+                if (indexToRemove !== -1) updatedItems.splice(indexToRemove, 1); // Remove the item
+                return { ...player, items: updatedItems };
+            }
+
+            return player;
+        });
+
+        // Update the game state with the new player data
+        try {
+            await updateDoc(doc(db, "games", game.roomId), {
+                players: updatedPlayers,
+            });
+
+            // Reset any necessary state
+            setUsingTorchId(null); // Reset the Torch ID (optional)
+            setSelectingShieldTargetId(null); // Reset shield target (if needed)
+        } catch (err) {
+            console.error("Failed to update torch reveal and item removal:", err);
+        }
+    };
 
     const handleProtect = async (targetUid, itemIdToRemove) => {
         const updatedPlayers = game.players.map(player => {
@@ -111,6 +151,15 @@ const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer
                                     </button>
                                 )}
 
+                                {stage === "4" && item.slug === "torch" && (
+                                    <button
+                                        onClick={() => setUsingTorchId(item.id)}
+                                        className="bg-yellow-600 text-black px-2 py-1 ml-auto rounded"
+                                    >
+                                        Use
+                                    </button>
+                                )}
+
                                 {stage === "5" && item.slug === "potion" && killedPlayer && !killedPlayer.revived && (
 
                                     <button
@@ -121,6 +170,31 @@ const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer
                                     </button>
                                 )}
                             </div>
+
+                            {usingTorchId === item.id && (
+                                <div className="mt-2">
+                                    <p className="text-[10px] text-gray-300 mb-1">Select a player to investigate:</p>
+                                    <ul className="space-y-1 text-xs">
+                                        {allPlayers
+                                            .filter(player => player.alive && player.uid !== currentPlayer.uid)
+                                            .map(player => (
+                                                <li
+                                                    key={player.uid}
+                                                    className="flex justify-between items-center bg-zinc-800 p-2 rounded"
+                                                >
+                                                    <span>{player.character}</span>
+                                                    <button
+                                                        onClick={() => handleTorchReveal(player.uid, item.id)}
+                                                        className="text-orange-300 underline hover:text-orange-500"
+                                                    >
+                                                        🔥 Reveal
+                                                    </button>
+                                                </li>
+                                            ))}
+                                    </ul>
+                                </div>
+                            )}
+
 
                             {selectingShieldTargetId === item.id && (
                                 <div className="mt-2">
@@ -148,6 +222,7 @@ const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer
                                 </div>
                             )}
 
+
                             {usingPotionId === item.id && (
                                 <div className="mt-2">
                                     <p className="text-[10px] text-gray-300 mb-1">
@@ -166,6 +241,12 @@ const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer
                 </div>
             ) : (
                 <p className="text-gray-400 text-sm italic">You have no items right now.</p>
+            )}
+
+            {torchReveal && (
+                <div className="mt-3 text-[10px] text-orange-300 bg-zinc-800 p-2 rounded">
+                    🔍 {torchReveal.character} is {torchReveal.isMurderer ? "a ❌ Murderer" : "✅ not a Murderer"}.
+                </div>
             )}
         </div>
     );

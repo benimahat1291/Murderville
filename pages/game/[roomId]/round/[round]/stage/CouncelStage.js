@@ -67,13 +67,12 @@ export default function CouncelStage({ roomId, round, stage }) {
 
                         const gameData = gameDoc.data();
 
-                        // Modify the `alive` status inside the `players` array
-                        const updatedPlayers = gameData.players.map(player =>
-                            player.uid === playerToExile.uid
-                                ? { ...player, alive: false }
-                                : player
-                        );
-
+                        // Reset extraVoteUsedThisRound
+                        const updatedPlayers = gameData.players.map(player => ({
+                            ...player,
+                            alive: player.uid === playerToExile.uid ? false : player.alive,
+                            extraVoteUsedThisRound: false // clear after each vote
+                        }));
                         transaction.update(gameRef, {
                             players: updatedPlayers,
                             votingStarted: false,
@@ -143,6 +142,7 @@ export default function CouncelStage({ roomId, round, stage }) {
                                     currentUser={currentUser}
                                     onVotesSubmitted={handleVotesSubmitted}
                                     voteCount={1}
+                                    game={game}
 
                                 />
                             </div>

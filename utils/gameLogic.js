@@ -72,8 +72,18 @@ export async function saveVotesToFirestore(roomId, currentRound, selectedVotes, 
 
         // Count votes
         const voteCounts = {};
-        Object.values(newVotes).flat().forEach(vote => {
-            voteCounts[vote] = (voteCounts[vote] || 0) + 1;
+        Object.entries(newVotes).forEach(([voterUid, votedUids]) => {
+            const voter = gameData.players.find(p => p.uid === voterUid);
+            let multiplier = 1;
+
+            // If Mayor and bought extra vote, count double
+            if (voter?.characterSlug === "mayor" && voter?.extraVoteUsedThisRound) {
+                multiplier = 2;
+            }
+
+            votedUids.forEach(vote => {
+                voteCounts[vote] = (voteCounts[vote] || 0) + multiplier;
+            });
         });
 
         // Format results with character names

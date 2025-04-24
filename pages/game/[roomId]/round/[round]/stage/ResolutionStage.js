@@ -65,11 +65,22 @@ export default function ResolutionStage({ roomId, round, stage, currentPlayer, }
         if (!killedPlayerData) return console.log("Killed player not found");
 
         if (killedPlayerData.isProtected) {
-
             console.log(`${killedPlayerData.name} was protected!`);
-            setKilledPlayer({ ...killedPlayerData, protected: true });
+
+            const protectedPlayer = { ...killedPlayerData, protected: true };
+
+            const updatedKillBox = game.killBox.map((kb, index) =>
+                index === roundKillBoxIndex ? { ...kb, killed: protectedPlayer } : kb
+            );
+
+            await updateDoc(doc(db, 'games', roomId), {
+                killBox: updatedKillBox
+            });
+
+            setKilledPlayer(protectedPlayer); // optional: for local UI speed
             return;
-        } else {
+        }
+        else {
             setKilledPlayer({ ...killedPlayerData, alive: false });
             const gameRef = doc(db, 'games', roomId);
             const updatedPlayers = players.map(player =>

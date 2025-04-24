@@ -76,13 +76,13 @@ export default function Lobby() {
             {
                 name: 'The Mayor',
                 slug: 'mayor',
-                ability: 'Has two votes per council. If killed, the next day phase is skipped due to chaos.',
+                ability: 'Has the ability to buy an extra vote in exchange for gold.',
                 items: []
             },
             {
                 name: 'The Doctor',
                 slug: 'doctor',
-                ability: 'Starts with a potion and injection. Potions cost -1 coin to use.',
+                ability: 'Starts with two potions. Can buy potions for 5 gold',
                 items: [
                     {
                         item: 'Potion',
@@ -100,14 +100,14 @@ export default function Lobby() {
             {
                 name: 'The Blacksmith',
                 slug: 'blacksmith',
-                ability: 'Can give a player a one-time shield to block a murder.',
+                ability: 'Starts with a shield  Can buy shields for 3 gold.',
                 items: []
 
             },
             {
                 name: 'The Innkeeper',
                 slug: 'innkeeper',
-                ability: 'Can block one player’s ability by hosting them at the inn.',
+                ability: 'Can block one player’s Vote at council',
                 items: []
 
             },
@@ -156,7 +156,7 @@ export default function Lobby() {
             {
                 name: 'The Sherif',
                 slug: 'sherif',
-                ability: 'Can check one player each night to see if they’re a murderer.',
+                ability: 'Can check one player every even round to see if they’re a murderer.',
                 items: []
 
             },
@@ -182,7 +182,7 @@ export default function Lobby() {
             villageCharacters.find(c => c.slug === 'doctor'),
             villageCharacters.find(c => c.slug === 'sherif'),
             villageCharacters.find(c => c.slug === 'gaurd'),
-            villageCharacters.find(c => c.slug === 'fortune-teller'),
+            villageCharacters.find(c => c.slug === 'blacksmith'),
             villageCharacters.find(c => c.slug === 'priest'),
 
 

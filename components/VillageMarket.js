@@ -34,16 +34,19 @@ export default function VillageMarket({ game, currentPlayer, }) {
     const playerGold = currentPlayer?.gold || 0;
 
     const handlePurchase = async (item) => {
-        if (playerGold < item.price) {
+        const isDoctor = currentPlayer.characterSlug === "doctor";
+        const actualPrice = item.slug === "potion" && isDoctor ? 5 : item.price;
+
+        if (playerGold < actualPrice) {
             setMessage(`❌ Not enough gold to buy ${item.name}`);
             return;
         }
 
         const newItem = {
-            id: crypto.randomUUID(), // ✅ Unique identifier
+            id: crypto.randomUUID(),
             item: item.name,
             slug: item.slug,
-            description: item.description
+            description: item.description,
         };
 
         const updatedPlayers = game.players.map((p) => {
@@ -51,7 +54,7 @@ export default function VillageMarket({ game, currentPlayer, }) {
 
             return {
                 ...p,
-                gold: p.gold - item.price,
+                gold: p.gold - actualPrice,
                 items: [...(p.items || []), newItem],
             };
         });
@@ -69,6 +72,7 @@ export default function VillageMarket({ game, currentPlayer, }) {
         }
     };
 
+
     return (
         <div className="mt-4 text-white bg-black bg-opacity-50 p-4 rounded-lg border border-yellow-700">
             <h2 className="text-base font-bold mb-2">🏪 Village Market</h2>
@@ -77,36 +81,41 @@ export default function VillageMarket({ game, currentPlayer, }) {
             </p>
 
             <div className="space-y-3">
-                {ITEMS.map((item) => (
-                    <div
-                        key={item.slug}
-                        className="flex items-center justify-between bg-gray-900 px-4 py-2 rounded text-xs"
-                    >
-                        <div className="flex items-center gap-3 relative group cursor-pointer">
-                            <img
-                                src={`/market/${item.slug}.png`}
-                                alt={item.name}
-                                className="w-10 h-10 object-contain rounded"
-                            />
-                            <span>
-                                {item.name} — <strong>{item.price} gold</strong>
-                            </span>
+                {ITEMS.map((item) => {
+                    const isDoctor = currentPlayer.characterSlug === "doctor";
+                    const actualPrice = item.slug === "potion" && isDoctor ? 5 : item.price;
 
-                            {/* Tooltip */}
-                            <div className="absolute z-10 bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex bg-black bg-opacity-90 border border-yellow-500 text-white text-[10px] p-2 rounded w-60 shadow-lg">
-                                {item.description}
-                            </div>
-                        </div>
-
-                        <button
-                            className="bg-yellow-600 hover:bg-yellow-400 text-black font-semibold py-1 px-4 rounded disabled:opacity-40"
-                            onClick={() => handlePurchase(item)}
-                            disabled={playerGold < item.price}
+                    return (
+                        <div
+                            key={item.slug}
+                            className="flex items-center justify-between bg-gray-900 px-4 py-2 rounded text-xs"
                         >
-                            Buy
-                        </button>
-                    </div>
-                ))}
+                            <div className="flex items-center gap-3 relative group cursor-pointer">
+                                <img
+                                    src={`/market/${item.slug}.png`}
+                                    alt={item.name}
+                                    className="w-10 h-10 object-contain rounded"
+                                />
+                                <span>
+                                    {item.name} — <strong>{actualPrice} gold</strong>
+                                </span>
+
+                                <div className="absolute z-10 bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex bg-black bg-opacity-90 border border-yellow-500 text-white text-[10px] p-2 rounded w-60 shadow-lg">
+                                    {item.description}
+                                </div>
+                            </div>
+
+                            <button
+                                className="bg-yellow-600 hover:bg-yellow-400 text-black font-semibold py-1 px-4 rounded disabled:opacity-40"
+                                onClick={() => handlePurchase(item)}
+                                disabled={playerGold < actualPrice}
+                            >
+                                Buy
+                            </button>
+                        </div>
+                    );
+                })}
+
             </div>
 
             {message && <p className="mt-4 text-sm text-yellow-300">{message}</p>}
