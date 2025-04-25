@@ -37,6 +37,7 @@ export const initializeMissionDivide = async (gameId, currentRound) => {
     const newEvent = {
         round: currentRound,
         gameState: "waiting",
+        gameType: "mission-divide",
         groupA: groupA.map(preparePlayer),
         groupB: groupB.map(preparePlayer),
         winners: [],

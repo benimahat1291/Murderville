@@ -17,6 +17,7 @@ export default function CouncelStage({ roomId, round, stage }) {
     const [allVotesSubmitted, setAllVotesSubmitted] = useState(false);
     const [votingStarted, setVotingStarted] = useState(false);
     const [votingComplete, setVotingComplete] = useState(false);
+    const [showInfo, setShowInfo] = useState(false);
 
     useEffect(() => {
         if (game.currentRound && game.currentStage) {
@@ -97,7 +98,7 @@ export default function CouncelStage({ roomId, round, stage }) {
 
     const isHost = game.hostId === currentUser?.uid;
     return (
-        <div className="w-full max-w-3xl bg-opacity-20 rounded-lg p-4 text-white font-pixel mx-auto">
+        <div className="w-full max-w-3xl bg-opacity-20 rounded-lg py-4 text-white font-pixel mx-auto">
             <div className="">
                 <h1 className="text-base text-white font-bold my-4"> {round}.{stage}) Council</h1>
 
@@ -108,14 +109,16 @@ export default function CouncelStage({ roomId, round, stage }) {
                     className="rounded-lg w-full h-40 object-cover border-b border-zinc-800"
                 />
 
-                <div className="mb-6 p-4 bg-black bg-opacity-50 rounded-xl mt-2 text-blue-100 text-[10px]">
-                    <h3 className="text-sm font-bold mb-2">📜 How It Works</h3>
+                <h3 className="text-[10px] font-bold mb-2 flex items-center mt-2 ">How It Works <button onClick={() => setShowInfo(!showInfo)}><i className='hn hn-info-circle text-xl ml-2 ' /></button></h3>
+
+
+                {showInfo && <div className="mb-6 p-4 bg-black bg-opacity-50 rounded-xl mt-2 text-blue-100 text-[10px]">
                     <ul className="list-disc pl-6 space-y-1">
                         <li>All players vote to exile a player they suspect is a Murderer.</li>
                         <li>The player with the most votes will be exiled (marked as dead).</li>
                         <li>You may only vote once. Choose wisely.</li>
                     </ul>
-                </div>
+                </div>}
 
                 {votingComplete ? (
                     <div className="mt-4">
@@ -124,13 +127,13 @@ export default function CouncelStage({ roomId, round, stage }) {
                 ) : (
                     <>
                         {!votingStarted && isHost && (
-                            <div className="text-center mt-4">
+                            <div className="text-center  mt-4">
                                 <button
                                     onClick={handleStartVoting}
-                                    className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded  text-lg font-bold"
+                                    className="flex items-center mx-auto text-sm text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition p-2  rounded font-bold"
 
                                 >
-                                    ▶️ Start Voting
+                                    <i className="hn hn-vote-yeah mr-2 text-2xl"></i>  Start Voting
                                 </button>
                             </div>
                         )}
@@ -149,7 +152,9 @@ export default function CouncelStage({ roomId, round, stage }) {
                         )}
 
                         {!votingStarted && !isHost && (
-                            <p className="text-gray-300 text-center">⏳ Waiting for voting to start...</p>
+                            <p
+                                className="flex items-center mx-auto text-[10px] animate-pulse text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition p-2  rounded font-bold"
+                            >⏳ Waiting for voting to start...</p>
                         )}
                     </>
                 )}

@@ -243,19 +243,17 @@ export default function Lobby() {
         <Page>
             <div>
                 <div className="flex flex-col items-center justify-center min-h-screen w-full max-w-xl  text-white p-6 rounded-xl shadow-lg space-y-4">
-                    <h1 className="text-xl sm:text-3xl font-bold font-pixel text-center">
+                    <h1 className="text-sm sm:text-3xl font-bold font-pixel text-center">
                         Lobby - Room {roomId}
                     </h1>
                     <div className='bg-[rgba(0,0,0,0.5)] p-4 rounded-xl'>
                         <div className="w-full ">
                             <ol className="list-decimal space-y-2 text-sm pl-5">
                                 {players.map((p) => (
-                                    <li key={p.uid}>
+                                    <li key={p.uid} className={`${p.uid === player?.uid ? 'text-yellow-300' : 'text-white'}`}>
                                         {p.name}{' '}
-                                        <span className="text-yellow-300">
-                                            {p.isBot ? '(Bot)' : ''}
+                                        <span className={`text-yellow-300`}>
                                             {p.isHost ? ' (Host)' : ''}
-                                            {p.uid === player?.uid ? ' (You)' : ''}
                                         </span>
                                     </li>
                                 ))}

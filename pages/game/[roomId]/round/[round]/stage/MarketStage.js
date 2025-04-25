@@ -45,30 +45,7 @@ export default function MarketStage({ roomId, round, stage, currentPlayer }) {
             </div> */}
 
 
-            {characterSlug === "doctor" && <div className="text-center text-white bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 my-4">
-                <Doctor character={currentPlayer} />
-            </div>}
-            {characterSlug === "mayor" && <div className="text-center text-white bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 my-4">
-                <Mayor character={currentPlayer} />
-            </div>}
-            {characterSlug === "priest" && <div className="text-center text-white bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 my-4">
-                <Priest character={currentPlayer} />
-            </div>}
-            {characterSlug === "sherif" && <div className="text-center text-white bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 my-4">
-                <Sherif character={currentPlayer} />
-            </div>}
-            {characterSlug === "hunter" && <div className="text-center text-white bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 my-4">
-                <Hunter character={currentPlayer} />
-            </div>}
-            {characterSlug === "fortune-teller" && <div className="text-center text-white bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 my-4">
-                <FortuneTeller character={currentPlayer} />
-            </div>}
-            {characterSlug === "drunkard" && <div className="text-center text-white bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 my-4">
-                <Drunkard character={currentPlayer} />
-            </div>}
-            {characterSlug === "gaurd" && <div className="text-center text-white bg-black bg-opacity-50 p-4 rounded-lg border border-red-700 my-4">
-                <Gaurd character={currentPlayer} />
-            </div>}
+
             <div className="my-4">
                 <PlayerItems game={game} currentPlayer={currentPlayer} />
             </div>

@@ -149,6 +149,8 @@ export default function StagePage() {
 
     return (
         <Page>
+            {currentPlayer && <PlayerBox player={currentPlayer} />}
+
             <StageComponent
                 stage={stage}
                 roomId={roomId}
@@ -173,7 +175,6 @@ export default function StagePage() {
                 gameData={gameData}
             />
 
-            {currentPlayer && <PlayerBox player={currentPlayer} />}
         </Page>
     );
 }

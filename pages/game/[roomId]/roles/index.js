@@ -83,21 +83,21 @@ export default function RolesPage() {
 
     return (
         <Page>
-            <div className="flex flex-col items-center justify-center min-h-screen w-full max-w-xl text-white p-6 rounded-xl shadow-lg space-y-6">
+            <div className="flex flex-col items-center justify-center min-h-screen w-full max-w-xl text-white py-2 rounded-xl shadow-lg space-y-6">
                 <h1 className="text-2xl sm:text-3xl font-bold font-pixel text-center">
                     Room {roomId}
                 </h1>
 
                 {/* Role Key */}
-                <div className="bg-black bg-opacity-50 p-3 rounded-lg border border-gray-600 text-sm w-full max-w-sm">
-                    <p className="font-bold mb-1 font-pixel text-center">🔑 Role Key</p>
+                <div className="bg-black bg-opacity-50 p-3 rounded-lg border border-gray-600 text-xs w-full max-w-sm">
+                    <p className="font-bold mb-1 font-pixel text-center"></p>
                     <div className="flex justify-around text-center">
                         <div>
-                            <div className="text-lg">🩸</div>
-                            <div className="text-xs text-red-300">Murderer</div>
+                            <div className="text-lg mb-2">🔪</div>
+                            <div className="text-xs text-blue-300">Murderer</div>
                         </div>
                         <div>
-                            <div className="text-lg">🛡️</div>
+                            <div className="text-lg mb-2">🛡️</div>
                             <div className="text-xs text-blue-300">Villager</div>
                         </div>
                     </div>
@@ -110,52 +110,47 @@ export default function RolesPage() {
                         const isCurrentUser = p.uid === currentUser?.uid;
                         const current = players.find((pl) => pl.uid === currentUser?.uid);
                         const currentIsMurderer = current?.isMurderer;
-
+                        console.log("role", p)
                         let icon = '';
 
                         if (isCurrentUser) {
-                            icon = currentIsMurderer ? '🩸' : '🛡️';
+                            icon = currentIsMurderer ? '🔪' : '🛡️';
                         } else if (currentIsMurderer && p.isMurderer) {
-                            icon = '🩸'; // Only murderers see each other
+                            icon = '🔪'; // Only murderers see each other
                         }
 
                         return (
-                            <li key={p.uid} className="flex items-center gap-2">
-                                <span className="font-bold">{p.name}</span>
+                            <li key={p.uid} className="flex items-center gap-2 text-sm">
+                                <span className={`font-bold ${isCurrentUser ? "text-yellow-300" : "text-white"} text-[10px]`}>{p.name}</span>
+                                <span className='text-[7px]'>- {p.character}</span>
                                 {icon && <span className="text-xl">{icon}</span>}
                             </li>
                         );
                     })}
                 </ul>
 
-
-                {/* Host Start Button */}
-                {isHost && (
-                    <div className="flex justify-center pt-4">
-                        <button
-                            onClick={startRoundOneStageOne}
-                            className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded  text-lg font-bold"
-                        >
-                            Start Game
-                        </button>
-                    </div>
-                )}
-
-                {/* Murderers-Only Box */}
                 {playerIsMurderer(currentUser, players) && (
-                    <div className="w-full max-w-xl bg-red-900 bg-opacity-60 border border-red-500 text-white p-4 mt-6 rounded-lg">
-                        <h2 className="font-pixel text-lg mb-2 text-red-200 text-center">🩸 Fellow Murderers</h2>
-                        <ul className="list-disc pl-5 space-y-1 text-sm">
-                            {players
-                                .filter((p) => p.isMurderer && p.uid !== currentUser?.uid)
-                                .map((murderer) => (
-                                    <li key={murderer.uid} className="text-red-300">{murderer.name}</li>
-                                ))}
-                        </ul>
-                        <p className="text-xs text-red-400 mt-2 text-center italic">Keep your identity hidden...</p>
+                    <div className="w-full max-w-xl bg-red-900 bg-opacity-30 text-white p-4 mt-6 rounded-lg">
+                        <h2 className="font-pixel text-xs mb-2 text-red-200 ">You are a Murderer</h2>
+                        <span className='text-[9px]'>Work with your cohort of village murderers to kill the villagers one by one. Win when Murderers outnumber the villagers </span>
                     </div>
                 )}
             </div>
+
+            {/* Host Start Button */}
+            {isHost && (
+                <div className="flex justify-center pt-4">
+                    <button
+                        onClick={startRoundOneStageOne}
+                        className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded  text-lg font-bold"
+                    >
+                        Start Game
+                    </button>
+                </div>
+            )}
+
+            {/* Murderers-Only Box */}
+
         </Page>
 
     );

@@ -49,6 +49,7 @@ export const initializeGame = async (gameId, currentRound) => {
             losers: [],
             didnotplay: [],
             gameState: "waiting",
+            gameType: "hand-youre-dealt",
         };
 
         await updateDoc(gameRef, {

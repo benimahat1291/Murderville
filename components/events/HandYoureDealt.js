@@ -7,6 +7,7 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
     const [alivePlayers, setAlivePlayers] = useState([]);
     const [currentPlayer, setCurrentPlayer] = useState(null);
     const [eventData, setEventData] = useState(null);
+    const [showInfo, setShowInfo] = useState(false);
 
     console.log(eventData, "eventData");
 
@@ -160,9 +161,12 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
                     alt={"Hand-Youre-Dealt"}
                     className="rounded-lg w-full h-40 object-cover border-b border-zinc-800"
                 />
+                <h3 className="flex mt-2 items-center text-sm font-bold mb-2">How It Works
+                    <button onClick={() => setShowInfo(!showInfo)} className="ml-2">
+                        <i className="hn hn-info-circle text-xl" />
+                    </button></h3>
 
-                <div className="mb-6 p-4  bg-black bg-opacity-50 rounded-xl mt-2  text-blue-100 ">
-                    <h3 className="text-sm font-bold mb-2">📜 How It Works</h3>
+                {(eventData?.gameState === "waiting" || showInfo) && <div className="mb-6 p-4  bg-black bg-opacity-50 rounded-xl mt-2  text-blue-100 ">
                     <ul className="list-disc pl-6 text-[8px] space-y-1">
                         <li>You get 2 random cards.(A=1,j=11,Q=12,K=13)</li>
                         <li>Choose to <span className="text-green-400">Play</span> or <span className="text-red-400">Fold</span>.</li>
@@ -170,21 +174,21 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
                         <li>win = <span className="text-green-400">+4 coins</span></li>
                         <li>play = <span className="text-red-400">-2 coins</span></li>
                     </ul>
-                </div>
+                </div>}
 
                 {!eventData && <p className="text-center">🕒 Loading event...</p>}
 
                 {eventData?.gameState === "waiting" && (
-                    <div className="p-4 text-center bg-yellow-100 text-yellow-800 rounded-lg font-mono">
+                    <div className="p-2 text-center bg-yellow-300 text-yellow-800 rounded-lg font-mono">
                         {isHost ? (
-                            <>
-                                <p className="mb-2 font-semibold">You’re the host. Ready to begin?</p>
-                                <button onClick={startGame} className="bg-blue-600 px-4 py-2 rounded text-white hover:bg-blue-700">
-                                    ▶️ Start Round
+                            <div className="flex flex-col jsutify-center items-center">
+                                <p className="mb-2 font-semibold text-[10px]">You’re the host. Ready to begin?</p>
+                                <button onClick={startGame} className="bg-black flex items-center text-red-500 px-4 py-2 rounded ">
+                                    <i className="hn hn-play mr-2" /> Start Round
                                 </button>
-                            </>
+                            </div>
                         ) : (
-                            <p>⏳ Waiting for the host to start the round...</p>
+                            <p className="animate-pulse text-[10px]"> Waiting for the host to start the round...</p>
                         )}
                     </div>
                 )}
@@ -200,14 +204,17 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
                                     <img key={i} src={card.image} alt={`Card ${card.rank} of ${card.suit}`} className="w-1/2 h-auto mr-2" />
                                 ))}
                             </div>
-                            {currentPlayer.gold > 1 && (
-                                <button onClick={() => handleDecision(true)} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mr-2">
-                                    ✅ Play
+                            <div className="flex justify-center items-center">
+                                {currentPlayer.gold >= 2 ? (
+                                    <button onClick={() => handleDecision(true)} className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mr-2">
+                                        <i className="hn hn-check-box mr-2 "></i>  Play
+                                    </button>
+                                ) : <span>Not enough gold to play</span>}
+                                <button onClick={() => handleDecision(false)} className="flex items-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+                                    <i className="hn hn-download mr-2"></i> Fold
                                 </button>
-                            )}
-                            <button onClick={() => handleDecision(false)} className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
-                                ❌ Fold
-                            </button>
+                            </div>
+
                         </div>
                         {/* player dicision list */}
                         <div className="mt-6">
@@ -246,16 +253,26 @@ export default function HandYoureDealt({ gameId, currentUser, isHost, currentRou
                     </>
                 )}
 
-                {eventData?.gameState === "results-ready" && isHost && (
-                    <div className="text-center mt-6">
-                        <button
-                            onClick={finishTheGame}
-                            className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded  text-lg font-bold"
+                {eventData?.gameState === "results-ready" && (
+                    <>
+                        {isHost ? <div className="text-center mt-6">
+                            <button
+                                onClick={finishTheGame}
+                                className="bg-yellow-300 flex items-center text-black p-2 rounded"
 
-                        >
-                            Reveal Results
-                        </button>
-                    </div>
+                            >
+                                Reveal Results
+                            </button>
+                        </div> : <div className="text-center mt-6">
+                            <span
+                                onClick={finishTheGame}
+                                className="bg-yellow-300 text-[7px] animate-pulse text-black flex items-center  p-2 rounded"
+
+                            >
+                                waiting for host to reveal results...
+                            </span>
+                        </div>}
+                    </>
                 )}
                 {/* Result Section */}
                 {eventData?.gameState === "completed" && <div className="grid grid-cols-3">

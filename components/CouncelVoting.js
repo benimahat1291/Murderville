@@ -65,9 +65,9 @@ export default function CouncelVoting({ players, currentUser, onVotesSubmitted, 
     const isMayor = currentPlayer.characterSlug === 'mayor'; // Assuming "role" is a field that holds the player's role
 
     return (
-        <div className="w-full px-4 sm:px-6 md:px-0 max-w-6xl mx-auto mt-6 text-white font-pixel">
-            <h2 className="text-xl text-yellow-400 mb-2 text-center">🔍 Vote for Who You Suspect!</h2>
-            <p className="text-sm text-center mb-6 text-gray-300">You must vote for 1 player (but the Mayor's vote counts as 2 votes for that player).</p>
+        <div className="w-full max-w-6xl mx-auto mt-6 text-white font-pixel">
+            <h2 className="text-sm text-yellow-400 mb-2 text-center">Vote for who to exile!</h2>
+            <p className="text-[10px] text-center mb-6 text-gray-300">You must vote for 1 player </p>
 
             {/* If Mayor, display option to buy extra vote */}
             {isMayor && !hasBoughtExtraVote && (
@@ -75,9 +75,10 @@ export default function CouncelVoting({ players, currentUser, onVotesSubmitted, 
                     <button
                         onClick={handleBuyExtraVote}
                         disabled={currentPlayer.gold >= 3 ? false : true}
-                        className="px-6 py-2 text-sm sm:text-base font-bold bg-blue-600 hover:bg-blue-700 text-white rounded shadow-lg transition"
+                        className="px-6 py-2 text-xs sm:text-base font-bold bg-blue-600 hover:bg-blue-700 text-white rounded shadow-lg transition"
                     >
-                        Buy Extra Vote (3 Coins)
+                        Buy Extra Vote <span>
+                        </span>3 Coins
                     </button>
                 </div>
             )}

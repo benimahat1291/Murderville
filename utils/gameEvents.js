@@ -1,34 +1,22 @@
 export const gameEvents = {
-    handYoureDealt: (game) => {
+    "hand-your-dealt": (game) => {
         if (!game || !game.players) return null;
         return {
-            type: "The Hand You’re Dealt",
-            message: "You have been dealt two random cards. Choose to play or fold."
+            type: "hand-youre-dealt",
+            name: "The Hand You’re Dealt",
+            message: "You have been dealt two random cards. Choose to play or fold.",
+            image: "hand-youre-dealt.png",
         };
     },
-    missionDivide: (game) => {
+    "mission-divide": (game) => {
         if (!game || !game.players) return null;
         return {
-            type: "A Town Divided",
-            message: "The town must split up into two groups and depart on a mission!"
+            type: "mission-divide",
+            name: "Mission Divide",
+            message: "The town must split up into two groups and depart on a mission!",
+            image: "mission-divide.png",
         };
     },
-
-
-    // villageFeast: (gameData) => {
-    //     console.log("Village Feast Event: Players donate gold to the village.");
-    //     return { type: "villageFeast", message: "A feast is happening! Donate gold to the village fund." };
-    // },
-
-    // banditRaid: (gameData) => {
-    //     console.log("Bandit Raid Event: Players must defend their gold from bandits!");
-    //     return { type: "banditRaid", message: "Bandits are attacking! Protect your gold!" };
-    // },
-
-    // stormComing: (gameData) => {
-    //     console.log("Storm Event: A storm is coming! Brace for impact.");
-    //     return { type: "stormComing", message: "A violent storm is on the horizon! Seek shelter." };
-    // }
 };
 
 // Function to randomly pick an event

@@ -16,14 +16,23 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
 
     useEffect(() => {
         if (!game || !roomId || !round) return;
+        const currentGameData = game?.events?.[round];
+        const currentGameType = currentGameData?.gameType || null;
 
-        let selectedEvent
+        console.log("Current Game:", game, "GameType:", currentGameType);
 
+        let selectedEvent = null;
+        // if (currentGameType) {
+        //     selectedEvent = gameEvents[currentGameType](game);
+        // } else {
+        //     selectedEvent = getRandomEvent(game)(game);
+        // }
         if (round === "1") {
-            selectedEvent = gameEvents.handYoureDealt(game);
+            selectedEvent = gameEvents["hand-your-dealt"](game);
         } else if (round === "2") {
-            selectedEvent = gameEvents.missionDivide(game);
+            selectedEvent = gameEvents["mission-divide"](game);
         }
+
 
         setEvent(selectedEvent);
     }, [game, roomId, round]);
@@ -36,6 +45,11 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
     };
 
     const isHost = currentUser && game.hostId === currentUser.uid;
+    let gameState
+    if (game.currentRound && game.currentStage) {
+        gameState = game.events[game.currentRound].gameState;
+    }
+
 
     return (
         <div className="">
@@ -48,11 +62,11 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
 
             {/* Load the game component if the event is "The Hand You’re Dealt" */}
             <div className='mt-4 p-2'>
-                {event?.type === "The Hand You’re Dealt" && game.players ? ( // ✅ Ensure game.players is defined
+                {event?.type === "hand-youre-dealt" && game.players ? ( // ✅ Ensure game.players is defined
                     <>
                         <HandYoureDealt gameData={game} currentUser={currentUser} isHost={isHost} currentRound={round} gameId={roomId} players={game.players} onComplete={handleGameCompletion} />
                     </>
-                ) : event?.type === "A Town Divided" ? ( // ✅ Ensure game.players is defined
+                ) : event?.type === "mission-divide" ? ( // ✅ Ensure game.players is defined
                     <>
                         <MissionDivide gameData={game} currentUser={currentUser} isHost={isHost} currentRound={round} gameId={roomId} players={game.players} onComplete={handleGameCompletion} />
                     </>
@@ -65,7 +79,7 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
             </div>
 
 
-            {isHost && (
+            {isHost && gameState === "completed" && (
                 <div className='w-full text-center'>
                     <button onClick={() => advanceToNextStageOrRound(roomId)} c
                         className="text-red-100 bg-black border-2 border-red-700 hover:bg-red-700 hover:text-black transition px-6 py-2 rounded  text-lg font-bold"

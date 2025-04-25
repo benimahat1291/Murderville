@@ -95,12 +95,12 @@ export default function Home() {
     return (
         <Page>
             <div className="flex items-center justify-center min-h-screen ">
-                <div className="w-full max-w-md bg-black bg-opacity-70 text-white p-6 rounded-xl shadow-lg space-y-4">
+                <div className=" max-w-md bg-black bg-opacity-70 text-white p-2 rounded-xl shadow-lg space-y-4">
                     <h1 className=" text-xl sm:text-3xl font-bold text-center">Welcome to MurderVile</h1>
                     <p className="text-sm text-center">Hello, {user.displayName || 'Player'}!</p>
                     <div className="flex justify-center space-x-4">
-                        <button onClick={openCreateGameModal} className="bg-green-500 text-white px-4 py-2 text-sm rounded"><span className='text-xl'>Create</span> Game</button>
-                        <button onClick={handleJoinGame} className="bg-blue-500 text-white px-4 py-2 text-sm rounded"><span className='text-xl'>Join</span> Game</button>
+                        <button onClick={openCreateGameModal} className="bg-green-500 text-white px-4 py-2 text-xs rounded"><span className='text-sm'>Create</span> Game</button>
+                        <button onClick={handleJoinGame} className="bg-blue-500 text-white px-4 py-2 text-xs rounded"><span className='text-sm'>Join</span> Game</button>
                     </div>
                     <button onClick={handleLogout} className="w-full bg-red-500 text-black px-4 py-2 rounded">Logout</button>
 

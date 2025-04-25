@@ -32,6 +32,7 @@ const ITEMS = [
 export default function VillageMarket({ game, currentPlayer, }) {
     const [message, setMessage] = useState("");
     const playerGold = currentPlayer?.gold || 0;
+    const [showInfo, setShowInfo] = useState({})
 
     const handlePurchase = async (item) => {
         const isDoctor = currentPlayer.characterSlug === "doctor";
@@ -75,50 +76,58 @@ export default function VillageMarket({ game, currentPlayer, }) {
 
     return (
         <div className="mt-4 text-white bg-black bg-opacity-50 p-4 rounded-lg border border-yellow-700">
-            <h2 className="text-base font-bold mb-2">🏪 Village Market</h2>
-            <p className="mb-4 text-sm">
-                You have <strong>{playerGold}</strong> gold.
+            <h2 className="text-base font-bold mb-2 flex items-center"><i className="hn hn-shop-solid text-3xl mr-4" />Village Market</h2>
+            <p className="mb-4 text-xs">
+                <i className='hn hn-finance text-lg mr-1'></i>Gold: <span className='text-base'>{currentPlayer?.gold ?? 0}</span>
+
             </p>
 
             <div className="space-y-3">
                 {ITEMS.map((item) => {
-                    const isDoctor = currentPlayer.characterSlug === "doctor";
+                    const isDoctor = currentPlayer?.characterSlug === "doctor";
                     const actualPrice = item.slug === "potion" && isDoctor ? 5 : item.price;
 
                     return (
                         <div
                             key={item.slug}
-                            className="flex items-center justify-between bg-gray-900 px-4 py-2 rounded text-xs"
+                            className=" bg-gray-900 p-1s rounded text-xs"
                         >
-                            <div className="flex items-center gap-3 relative group cursor-pointer">
-                                <img
-                                    src={`/market/${item.slug}.png`}
-                                    alt={item.name}
-                                    className="w-10 h-10 object-contain rounded"
-                                />
-                                <span>
-                                    {item.name} — <strong>{actualPrice} gold</strong>
-                                </span>
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-3 relative group cursor-pointer">
+                                    <img
+                                        src={`/market/${item.slug}.png`}
+                                        alt={item.name}
+                                        className="w-10 h-10 object-contain rounded"
+                                    />
+                                    <div className="flex flex-col">
+                                        <span>
+                                            {item.name} <i onClick={() => setShowInfo(item)} className="hn hn-info-circle text-sm"></i>
+                                        </span>
+                                        <strong className="text-[10px] text-yellow-300">{actualPrice} gold</strong>
+                                    </div>
 
-                                <div className="absolute z-10 bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex bg-black bg-opacity-90 border border-yellow-500 text-white text-[10px] p-2 rounded w-60 shadow-lg">
-                                    {item.description}
                                 </div>
+
+                                <button
+                                    className="bg-yellow-600 hover:bg-yellow-400 text-black font-semibold py-1 px-2 mr-2 rounded disabled:opacity-40"
+                                    onClick={() => handlePurchase(item)}
+                                    disabled={playerGold < actualPrice || item.name === "Revival"}
+                                >
+                                    Buy
+                                </button>
+
                             </div>
 
-                            <button
-                                className="bg-yellow-600 hover:bg-yellow-400 text-black font-semibold py-1 px-4 rounded disabled:opacity-40"
-                                onClick={() => handlePurchase(item)}
-                                disabled={playerGold < actualPrice}
-                            >
-                                Buy
-                            </button>
+                            {showInfo?.description && item.description === showInfo.description && <div className="  text-[8px] p-2 rounded ">
+                                {item.description}
+                            </div>}
                         </div>
                     );
                 })}
 
             </div>
 
-            {message && <p className="mt-4 text-sm text-yellow-300">{message}</p>}
+            {message && <p className="mt-4 text-[10px] text-green-300">{message}</p>}
         </div>
     );
 }

@@ -1,10 +1,11 @@
 import React from 'react';
 
 const CouncelResults = ({ votesResult }) => {
+
     return (
         <div className="w-full max-w-3xl bg-black bg-opacity-20 rounded-lg p-4 text-white font-pixel mx-auto">
             <h2 className="text-sm text-center text-red-500 mb-6">
-                <span className="text-xl">🗳️</span> Council Results
+                <span className="text-xs">{votesResult[0].character} was exiled!</span>
             </h2>
 
             <ul className="space-y-3 text-[10px] max-h-[500px] overflow-y-auto">

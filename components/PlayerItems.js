@@ -53,10 +53,20 @@ const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer
 
     const handleProtect = async (targetUid, itemIdToRemove) => {
         const updatedPlayers = game.players.map(player => {
+            // ✅ If current player is protecting themselves
+            if (player.uid === targetUid && player.uid === currentPlayer.uid) {
+                const updatedItems = [...(player.items || [])];
+                const indexToRemove = updatedItems.findIndex(item => item.id === itemIdToRemove);
+                if (indexToRemove !== -1) updatedItems.splice(indexToRemove, 1);
+                return { ...player, isProtected: true, items: updatedItems };
+            }
+
+            // ✅ If this is the target (not currentPlayer)
             if (player.uid === targetUid) {
                 return { ...player, isProtected: true };
             }
 
+            // ✅ If this is the current player (not the target)
             if (player.uid === currentPlayer.uid) {
                 const updatedItems = [...(player.items || [])];
                 const indexToRemove = updatedItems.findIndex(item => item.id === itemIdToRemove);
@@ -77,6 +87,7 @@ const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer
             console.error("Failed to update protection:", err);
         }
     };
+
 
     const handleRevive = async (itemId) => {
         const revivedPlayer = {
@@ -124,16 +135,18 @@ const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer
     console.log("playerItems", killedPlayer, stage, currentPlayer)
 
     return (
-        <div className="mt-6 text-white bg-black bg-opacity-50 p-4 rounded-lg border border-yellow-700">
-            <h2 className="text-base font-bold mb-3">🎒 Your Items</h2>
+        <div className="mt-6 text-white bg-black bg-opacity-50 p-2 rounded-lg border border-yellow-700">
 
             {items.length > 0 ? (
                 <div className="space-y-2">
+                    <h2 className="text-base font-bold mb-3">🎒 Your Items</h2>
+
                     {items.map((item, index) => (
                         <div
                             key={item.id || `${item.slug}-${index}`}
                             className="flex flex-col bg-gray-900 px-4 py-2 rounded text-xs gap-2"
                         >
+
                             <div className="flex items-center gap-3">
                                 <img
                                     src={`/market/${item.slug}.png`}
@@ -240,7 +253,7 @@ const PlayerItems = ({ currentPlayer, game, stage, killedPlayer, setKilledPlayer
                     ))}
                 </div>
             ) : (
-                <p className="text-gray-400 text-sm italic">You have no items right now.</p>
+                <p className="text-gray-400 text-xs text-center italic">You Have No Items!</p>
             )}
 
             {torchReveal && (

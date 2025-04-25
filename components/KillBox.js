@@ -35,7 +35,7 @@ const KillBox = ({ murderers, gameData, roomId, currentPlayer }) => {
     return (
         <div className='bg-black w-full h-full p-2 rounded'>
             <strong className='text-white text-sm'>Kill Box</strong>
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="mt-2 grid grid-cols-2 gap-4">
 
                 {murderers.map((m) => {
                     const targetId = targets[m.uid];
