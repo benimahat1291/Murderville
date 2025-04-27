@@ -47,7 +47,7 @@ export default function EventStage({ roomId, round, stage, currentUser }) {
     const isHost = currentUser && game.hostId === currentUser.uid;
     let gameState
     if (game.currentRound && game.currentStage) {
-        gameState = game.events[game.currentRound].gameState;
+        gameState = game.events[game.currentRound]?.gameState;
     }
 
 

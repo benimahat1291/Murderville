@@ -6,7 +6,7 @@ import { initializeMissionDivide } from "../../utils/events/missionDivide";
 export default function MissionDivide({ gameId, currentUser, isHost, currentRound }) {
     const [eventData, setEventData] = useState(null);
     const [currentPlayer, setCurrentPlayer] = useState(null);
-
+    const [showInfo, setShowInfo] = useState(false);
     const roundKey = String(currentRound);
 
     useEffect(() => {
@@ -103,7 +103,7 @@ export default function MissionDivide({ gameId, currentUser, isHost, currentRoun
 
             const updatedPlayers = game.players.map(p => {
                 if (event.winners.includes(p.uid)) return { ...p, gold: (p.gold || 0) + 2 };
-                if (event.losers.includes(p.uid)) return { ...p, gold: (p.gold || 0) - 2 };
+                if (event.losers.includes(p.uid)) return { ...p };
                 return p;
             });
 
@@ -115,14 +115,15 @@ export default function MissionDivide({ gameId, currentUser, isHost, currentRoun
     };
 
     return (
-        <div className="flex justify-center p-4 text-white font-pixel">
-            <div className="w-full max-w-3xl bg-blue-900 bg-opacity-20 rounded-lg p-4">
+        <div className="flex justify-center text-white font-pixel">
+            <div className="w-full max-w-3xl bg-blue-900 bg-opacity-20 rounded-lg p-2">
                 <h2 className="text-sm text-center text-blue-400 mb-6">
                     <span className="text-xl">🕵️‍♂️</span> Mission Divide
                 </h2>
 
-                <div className="mb-4 p-4 bg-black bg-opacity-50 rounded-xl text-xs space-y-1">
-                    <h3 className="font-bold mb-2 text-blue-200">📜 Mission Rules</h3>
+                <h3 className="font-bold mb-2 text-blue-200"><i onClick={() => setShowInfo(!showInfo)} className="hn hn-info-circle mr-2 text-xl"></i>How it works?</h3>
+
+                {showInfo && <div className="mb-4 p-4 bg-black bg-opacity-50 rounded-xl text-xs space-y-1">
                     <ul className="list-disc pl-4">
                         <li>Players are split into 2 secret mission groups</li>
                         <li>Choose to <span className="text-green-400">Pass</span> or <span className="text-red-400">Sabotage</span></li>
@@ -130,7 +131,7 @@ export default function MissionDivide({ gameId, currentUser, isHost, currentRoun
                         <li>If anyone Sabotages → <span className="text-red-400">Everyone in group loses</span></li>
                         <li>Winners: <span className="text-yellow-300">+2 coins</span>, Losers: <span className="text-red-300">-2 coins</span></li>
                     </ul>
-                </div>
+                </div>}
 
                 {/* Waiting State */}
                 {eventData?.gameState === "waiting" && (
@@ -174,7 +175,7 @@ export default function MissionDivide({ gameId, currentUser, isHost, currentRoun
                 )}
 
                 {/* Team Display */}
-                {(eventData?.groupA || eventData?.groupB) && (
+                {(eventData?.groupA || eventData?.groupB) && eventData?.gameState !== "completed" && (
                     <div className="mt-6">
                         <h4 className="text-sm font-bold mb-2 text-blue-300">🧑‍🤝‍🧑 Mission Teams</h4>
                         <div className="grid grid-cols-2 gap-4">
@@ -213,20 +214,33 @@ export default function MissionDivide({ gameId, currentUser, isHost, currentRoun
 
                 {/* Final Result Section */}
                 {eventData?.gameState === "completed" && (
-                    <div className="mt-6 grid grid-cols-2 gap-4 text-center">
+                    <div className="mt-6 grid grid-cols-2 gap-2 text-center">
                         {[...eventData.groupA, ...eventData.groupB].map((p) => {
                             const isWinner = eventData.winners.includes(p.uid);
                             const isLoser = eventData.losers.includes(p.uid);
                             return (
                                 <div
                                     key={p.uid}
-                                    className="border border-zinc-600 p-2 rounded-md bg-opacity-40 bg-black"
+                                    className="border p-1 flex flex-col f border-zinc-600 rounded-md bg-opacity-40 bg-black"
                                 >
                                     <p className="text-[10px] font-bold">{p.character}</p>
-                                    <p>
-                                        {isWinner && <span className="text-green-400">✅ Winner (+2 gold)</span>}
-                                        {isLoser && <span className="text-red-400">❌ Loser (-2 gold)</span>}
-                                    </p>
+                                    {isWinner && <span className="text-green-400 flex flex-col text-[10px]">
+                                        <span>
+                                            ✅ Success</span>
+                                        <span className="text-xs text-yellow-300">
+                                            +2 gold
+                                        </span>
+                                    </span>}
+                                    {isLoser &&
+                                        <span className="text-red-400 flex flex-col text-[10px]">
+                                            <span >
+                                                ❌ Failed
+                                            </span>
+                                            <span className="text-xs text-red-300">
+
+                                            </span>
+
+                                        </span>}
                                 </div>
                             );
                         })}
